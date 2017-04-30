@@ -357,14 +357,13 @@ void CYUVPlayerDlg::open_files()
 			if ((s32fileNum + s8ImgNum) > MAX_IMAGE_NUM)
 			{
 				AfxMessageBox("多图浏览模式最多只允许打开 10 幅图像！", MB_ICONERROR);
-				
 				return;
 			}
-
+	/****************设置浏览图片格式************************/
 			set_view_mode();
 		}
 	}
-	
+	/****************输入图片参数函数************************/
 	s32Ret	 = get_input_parameter();
 	if (s32Ret == FAILED_YUVPlayer)
 	{
@@ -381,7 +380,7 @@ void CYUVPlayerDlg::open_files()
 				if (s8ImgNum == 1)
 				{
 					set_input_parameter_status(FALSE);
-//					AfxMessageBox("现在使用的是两图对比模式，请再打开一幅原始尺寸相同的图像！", MB_ICONINFORMATION);
+//			       AfxMessageBox("现在使用的是两图对比模式，请再打开一幅原始尺寸相同的图像！", MB_ICONINFORMATION);
 					m_openFile.SetFocus();
 				}
 				else

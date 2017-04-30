@@ -119,9 +119,9 @@ int32 CImageDlg::initial()
         break;
         
     case YUV420:
-        u32ChroPicSize	 = (s32Width >> 1) * (s32Height >> 1);
-        u32FrameSize	 = u32LumaPicSize + (u32ChroPicSize << 1);
-        s32FrameNum		 = pFile->GetLength() / u32FrameSize;
+		u32ChroPicSize	 = (s32Width >> 1) * (s32Height >> 1);
+		u32FrameSize= u32LumaPicSize + (u32ChroPicSize << 1);                    
+		s32FrameNum		 = pFile->GetLength() / u32FrameSize;
         
         break;
         
@@ -206,15 +206,15 @@ void CImageDlg::OnPaint()
 	// Do not call CFrameWnd::OnPaint() for painting messages
 }
 
-void CImageDlg::rotate_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV)
+void CImageDlg::rotate_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV)
 {
 	int32	i, j;
-	uint8*	pu8SrcY;
-	uint8*	pu8SrcU;
-	uint8*	pu8SrcV;
-	uint8*	pu8DstY;
-	uint8*	pu8DstU;
-	uint8*	pu8DstV;
+	uint16*	pu8SrcY;
+	uint16*	pu8SrcU;
+	uint16*	pu8SrcV;
+	uint16*	pu8DstY;
+	uint16*	pu8DstU;
+	uint16*	pu8DstV;
 
 
 	if (s16RotateAngle == 0)
@@ -356,15 +356,15 @@ void CImageDlg::rotate_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV)
 	pOrigYUV[2]	= pRotaYUV[2];
 }
 
-void CImageDlg::mirror_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV)
+void CImageDlg::mirror_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV)
 {
 	int32	i, j;
-	uint8*	pu8SrcY;
-	uint8*	pu8SrcU;
-	uint8*	pu8SrcV;
-	uint8*	pu8DstY;
-	uint8*	pu8DstU;
-	uint8*	pu8DstV;
+	uint16*	pu8SrcY;
+	uint16*	pu8SrcU;
+	uint16*	pu8SrcV;
+	uint16*	pu8DstY;
+	uint16*	pu8DstU;
+	uint16*	pu8DstV;
 
 
 	if (u8MirrorMode == MIRROR_NONE)
@@ -504,15 +504,15 @@ int32 CImageDlg::read_one_frame(uint8 u8ImageMode)
 		break;
 		
 	case YUV420:
-		if (u32LumaPicSize != pFile->Read(pReadYUV[0], u32LumaPicSize))
+		if (u32LumaPicSize<<1 != pFile->Read(pReadYUV[0], u32LumaPicSize<<1))
 		{
 			return EOF_YUVPlayer;
 		}
-		if (u32ChroPicSize != pFile->Read(pReadYUV[1], u32ChroPicSize))
+		if (u32ChroPicSize<<1 != pFile->Read(pReadYUV[1], u32ChroPicSize<<1))
 		{
 			return EOF_YUVPlayer;
 		}
-		if (u32ChroPicSize != pFile->Read(pReadYUV[2], u32ChroPicSize))
+		if (u32ChroPicSize<<1 != pFile->Read(pReadYUV[2], u32ChroPicSize<<1))
 		{
 			return EOF_YUVPlayer;
 		}

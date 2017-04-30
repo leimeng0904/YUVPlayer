@@ -45,14 +45,23 @@ public:
     LPBITMAPINFO	BmpInfo;
     CMBInfoDlg		MBInfoDlg;
     PCRITICAL_SECTION pCriticalSection;
-    LPBYTE	pYUVBuff;
+	/********************************************¸Ä******************************************/
+    /*LPBYTE	pYUVBuff;
     LPBYTE	pRGBBuff;
     LPBYTE	pReadYUV[3];
     LPBYTE	pOrigYUV[3];
     LPBYTE	pMirrYUV[3];
     LPBYTE	pRotaYUV[3];
     LPBYTE	pDisplayLuma;
-    LPBYTE	pDisplayChro;
+    LPBYTE	pDisplayChro;*/
+	LPWORD	pYUVBuff;
+	LPBYTE pRGBBuff;
+	LPWORD pReadYUV[3];
+	LPWORD pOrigYUV[3];
+	LPWORD pMirrYUV[3];
+	LPWORD pRotaYUV[3];
+	LPWORD pDisplayLuma;
+	LPWORD pDisplayChro;
     CString	fileName;
     CMenu	mouseMenu;
     CWnd	*pMainDlg;
@@ -72,8 +81,8 @@ public:
     void	show_macroblock_info();
     void	view_macroblock();
     void	color_space_convert(uint8 u8ImageMode);
-	void	YV12_to_RGB24(uint8* pu8Y, uint8* pu8U, uint8* pu8V);
-	void	YUY2_to_RGB24(uint8 *pu8RGBData, uint8 *pu8YUVData);
+	void	YV12_to_RGB24(uint16* pu8Y, uint16* pu8U, uint16* pu8V);
+	void	YUY2_to_RGB24(uint16 *pu8RGBData, uint16 *pu8YUVData);
     void	set_image_mode(uint8 u8ImageMode);
     void	draw_dash_frame(CRect &rect);
 	void	change_size(LPRECT pRect);

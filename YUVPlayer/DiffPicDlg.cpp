@@ -266,8 +266,8 @@ void CDiffPicDlg::get_one_frame(uint8 u8ImageMode)
 	int32	i;
 	int32	j;
 	uint32	u32Offset;
-	uint8	**pYUV1;
-	uint8	**pYUV2;
+	uint16	**pYUV1;
+	uint16	**pYUV2;
 	CYUVPlayerDlg	*pMainDlg	 = (CYUVPlayerDlg *)this->pMainDlg;
 
 

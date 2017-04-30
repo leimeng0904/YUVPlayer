@@ -51,20 +51,21 @@ int32 CChildDlg::malloc_memory()
 {
     uint32  u32LumaBuffSize;
     uint32  u32ChroBuffSize;
-    uint32	u32MemorySize;
+    uint32	u32MemorySize;                                                               
     
+
+	u32LumaBuffSize = ((u32LumaPicSize + 3) >> 2) << 2;
+	u32ChroBuffSize = ((u32ChroPicSize + 3) >> 2) << 2;
+	u32MemorySize = u32LumaBuffSize + (u32ChroBuffSize << 1);	//++ 读入的原始 YUV 图像
+	u32MemorySize += u32LumaBuffSize + (u32ChroBuffSize << 1);	//++ 镜像缓冲
+	u32MemorySize += u32LumaBuffSize + (u32ChroBuffSize << 1);	//++ 旋转缓冲
+	u32MemorySize += u32LumaPicSize;	//++ 用于显示的 YUV 图像亮度分量
+	u32MemorySize += u32ChroPicSize;	//++ 用于显示的 YUV 图像色度分量
+	u32MemorySize += (((s32Width * 3 + 3) >> 2) << 2) * s32Height;	//++ RGB 内存空间
+
+	
     
-    //++ 为加快寻找同步帧的速度，原始图像内存空间按 4 字节整数倍开辟
-    u32LumaBuffSize	  = ((u32LumaPicSize + 3) >> 2) << 2;
-    u32ChroBuffSize	  = ((u32ChroPicSize + 3) >> 2) << 2;
-    u32MemorySize	  = u32LumaBuffSize + (u32ChroBuffSize << 1);	//++ 读入的原始 YUV 图像
-    u32MemorySize	 += u32LumaBuffSize + (u32ChroBuffSize << 1);	//++ 镜像缓冲
-    u32MemorySize	 += u32LumaBuffSize + (u32ChroBuffSize << 1);	//++ 旋转缓冲
-    u32MemorySize	 += u32LumaPicSize;	//++ 用于显示的 YUV 图像亮度分量
-    u32MemorySize	 += u32ChroPicSize;	//++ 用于显示的 YUV 图像色度分量
-    u32MemorySize	 += (((s32Width * 3 + 3) >> 2) << 2) * s32Height;	//++ RGB 内存空间
-    
-    pYUVBuff    = (LPBYTE)malloc(u32MemorySize);
+    pYUVBuff    = (LPWORD)malloc(u32MemorySize);
     if (NULL == pYUVBuff)
     {
         AfxMessageBox("分配内存错误！\n", MB_ICONERROR);
@@ -72,18 +73,18 @@ int32 CChildDlg::malloc_memory()
         return FAILED_YUVPlayer;
     }
     pReadYUV[0]		= pYUVBuff;
-    pReadYUV[1]		= pReadYUV[0] + u32LumaBuffSize;
-    pReadYUV[2]		= pReadYUV[1] + u32ChroBuffSize;
-    pMirrYUV[0]		= pReadYUV[2] + u32ChroBuffSize;
-    pMirrYUV[1]		= pMirrYUV[0] + u32LumaBuffSize;
-    pMirrYUV[2]		= pMirrYUV[1] + u32ChroBuffSize;
-    pRotaYUV[0]		= pMirrYUV[2] + u32ChroBuffSize;
-    pRotaYUV[1]		= pRotaYUV[0] + u32LumaBuffSize;
-    pRotaYUV[2]		= pRotaYUV[1] + u32ChroBuffSize;
-    pDisplayLuma	= pRotaYUV[2] + u32ChroBuffSize;
-    pDisplayChro	= pDisplayLuma + u32LumaPicSize;
-    pRGBBuff		= pDisplayChro + u32ChroPicSize;
-    memset(pYUVBuff, 128, u32MemorySize);
+	pReadYUV[1] = pReadYUV[0] + u32LumaBuffSize ;
+	pReadYUV[2] = pReadYUV[1] + u32ChroBuffSize ;
+	pMirrYUV[0] = pReadYUV[2] + u32ChroBuffSize ;
+	pMirrYUV[1] = pMirrYUV[0] + u32LumaBuffSize ;
+	pMirrYUV[2] = pMirrYUV[1] + u32ChroBuffSize ;
+	pRotaYUV[0] = pMirrYUV[2] + u32ChroBuffSize ;
+	pRotaYUV[1] = pRotaYUV[0] + u32LumaBuffSize ;
+	pRotaYUV[2] = pRotaYUV[1] + u32ChroBuffSize ;
+	pDisplayLuma = pRotaYUV[2] + u32ChroBuffSize;
+	pDisplayChro = pDisplayLuma + u32LumaPicSize;
+	pRGBBuff = LPBYTE(pDisplayChro) + u32ChroPicSize;
+	memset(pYUVBuff, 128, u32MemorySize);		   
     
     hloc = GlobalAlloc(GMEM_ZEROINIT | GMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256));
     if (NULL == hloc)
@@ -217,7 +218,7 @@ void CChildDlg::color_space_convert(uint8 u8ImageMode)
     }
 }
 
-void CChildDlg::YV12_to_RGB24(uint8* pu8Y, uint8* pu8U, uint8* pu8V)
+void CChildDlg::YV12_to_RGB24(uint16* pu8Y, uint16* pu8U, uint16* pu8V)
 {
 	int32	x;
 	int32	y;
@@ -242,9 +243,9 @@ void CChildDlg::YV12_to_RGB24(uint8* pu8Y, uint8* pu8U, uint8* pu8V)
 
 			i	= m + x;
 			j	= n + (x >> 1);
-			rgb[2]	= int32(1.164383 * (pu8Y[i] - 16) + 1.596027 * (pu8V[j] - 128)); // r
-			rgb[1]	= int32(1.164383 * (pu8Y[i] - 16) - 0.812968 * (pu8V[j] - 128) - 0.391762 * (pu8U[j] - 128)); // g
-			rgb[0]	= int32(1.164383 * (pu8Y[i] - 16) + 2.017232 * (pu8U[j] - 128)); // b			
+			rgb[2] = int32(1.164383 * ((pu8Y[i] >> 2) - 16) + 1.596027 * ((pu8V[j] >> 2) - 128)); // r
+			rgb[1] = int32(1.164383 * ((pu8Y[i] >> 2) - 16) - 0.812968 * ((pu8V[j] >> 2) - 128) - 0.391762 * ((pu8U[j] >> 2) - 128)); // g
+			rgb[0] = int32(1.164383 * ((pu8Y[i] >> 2) - 16) + 2.017232 * ((pu8U[j] >> 2) - 128)); // b			
 // 			rgb[2]	= int32(1.164 * (pu8Y[i] - 16) + 1.793 * (pu8V[j] - 128)); // r
 // 			rgb[1]	= int32(1.164 * (pu8Y[i] - 16) - 0.534 * (pu8V[j] - 128) - 0.213 * (pu8U[j] - 128)); // g
 // 			rgb[0]	= int32(1.164 * (pu8Y[i] - 16) + 2.115 * (pu8U[j] - 128)); // b			
@@ -271,7 +272,7 @@ void CChildDlg::YV12_to_RGB24(uint8* pu8Y, uint8* pu8U, uint8* pu8V)
 	}
 }
 
-void CChildDlg::YUY2_to_RGB24(uint8 *pu8RGBData, uint8 *pu8YUVData)
+void CChildDlg::YUY2_to_RGB24(uint16 *pu8RGBData, uint16 *pu8YUVData)
 {
 	int32  R, G, B;
 	int32  x, y;
@@ -616,9 +617,9 @@ void CChildDlg::get_pixel_value()
     int32	j;
     int32	s32LumaWidth	 = s32Width;
     int32	s32ChroWidth	 = s32Width >> 1;
-    uint8	*pLuma		 = pOrigYUV[0] + (s32ViewMBy * s32LumaWidth + s32ViewMBx);
-    uint8	*pCb		 = pOrigYUV[1] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
-    uint8	*pCr		 = pOrigYUV[2] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
+    uint16	*pLuma		 = pOrigYUV[0] + (s32ViewMBy * s32LumaWidth + s32ViewMBx);
+    uint16	*pCb		 = pOrigYUV[1] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
+    uint16	*pCr		 = pOrigYUV[2] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
     
     
     //++ 启用临界区保护
