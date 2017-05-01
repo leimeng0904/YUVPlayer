@@ -61,11 +61,12 @@ int32 CChildDlg::malloc_memory()
 	u32MemorySize += u32LumaBuffSize + (u32ChroBuffSize << 1);	//++ 旋转缓冲
 	u32MemorySize += u32LumaPicSize;	//++ 用于显示的 YUV 图像亮度分量
 	u32MemorySize += u32ChroPicSize;	//++ 用于显示的 YUV 图像色度分量
-	u32MemorySize += (((s32Width * 3 + 3) >> 2) << 2) * s32Height;	//++ RGB 内存空间
+	//u32MemorySize += (((s32Width * 3 + 3) >> 2) << 2) * s32Height;	//++ RGB 内存空间
 
 	
     
-    pYUVBuff    = (LPWORD)malloc(u32MemorySize);
+	pYUVBuff = (LPWORD)malloc(u32MemorySize);
+	pRGBBuff = (LPBYTE)malloc((((s32Width * 3 + 3) >> 2) << 2) * s32Height);
     if (NULL == pYUVBuff)
     {
         AfxMessageBox("分配内存错误！\n", MB_ICONERROR);
@@ -83,7 +84,7 @@ int32 CChildDlg::malloc_memory()
 	pRotaYUV[2] = pRotaYUV[1] + u32ChroBuffSize ;
 	pDisplayLuma = pRotaYUV[2] + u32ChroBuffSize;
 	pDisplayChro = pDisplayLuma + u32LumaPicSize;
-	pRGBBuff = LPBYTE(pDisplayChro) + u32ChroPicSize;
+	//pRGBBuff =LPBYTE(pDisplayChro+ u32ChroPicSize);
 	memset(pYUVBuff, 128, u32MemorySize);		   
     
     hloc = GlobalAlloc(GMEM_ZEROINIT | GMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256));
