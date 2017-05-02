@@ -142,7 +142,10 @@ int32 CDiffPicDlg::create_window(CWnd *pMainDlg)
 
 void CDiffPicDlg::kill_window()
 {
-	free(pYUVBuff);
+	if (u8BitFormat==10)
+	    free(pYUVBuff); 
+	else
+		free(pYUVBuff1);
 	GlobalFree(hloc);
 	
 	MBInfoDlg.talbeFont.DeleteObject();

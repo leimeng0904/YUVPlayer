@@ -168,8 +168,10 @@ int32 CImageDlg::initial()
 	{
 		bEOFFlag		= TRUE;
 		bBackwardOK		= FALSE;
-
-		free(pYUVBuff);
+		if (u8BitFormat==10)
+		    free(pYUVBuff);
+		else
+			free(pYUVBuff1);
 		GlobalFree(hloc);
 
 		AfxMessageBox(fileName + " ¶ÁÈëÊý¾Ý´íÎó£¡", MB_ICONERROR);
@@ -1015,12 +1017,24 @@ void CImageDlg::OnMenuitemGosameframe()
     u32ChroLen	= (u32ChroPicSize + 3) >> 2;
     pCurrImg	= pMainDlg->pImage[s8DlgIdx];
     pTwinImg	= pMainDlg->pImage[1 - s8DlgIdx];
-	p32TwinY	= (int32 *)pTwinImg->pOrigYUV[0];
-	p32CurrY	= (int32 *)pCurrImg->pOrigYUV[0];
-	p32TwinU	= (int32 *)pTwinImg->pOrigYUV[1];
-	p32CurrU	= (int32 *)pCurrImg->pOrigYUV[1];
-	p32TwinV	= (int32 *)pTwinImg->pOrigYUV[2];
-	p32CurrV	= (int32 *)pCurrImg->pOrigYUV[2];
+	if (u8BitFormat == 10)
+	{
+		p32TwinY = (int32 *)pTwinImg->pOrigYUV[0];
+		p32CurrY = (int32 *)pCurrImg->pOrigYUV[0];
+		p32TwinU = (int32 *)pTwinImg->pOrigYUV[1];
+		p32CurrU = (int32 *)pCurrImg->pOrigYUV[1];
+		p32TwinV = (int32 *)pTwinImg->pOrigYUV[2];
+		p32CurrV = (int32 *)pCurrImg->pOrigYUV[2];
+	}
+	else
+	{
+		p32TwinY = (int32 *)pTwinImg->pOrigYUV1[0];
+		p32CurrY = (int32 *)pCurrImg->pOrigYUV1[0];
+		p32TwinU = (int32 *)pTwinImg->pOrigYUV1[1];
+		p32CurrU = (int32 *)pCurrImg->pOrigYUV1[1];
+		p32TwinV = (int32 *)pTwinImg->pOrigYUV1[2];
+		p32CurrV = (int32 *)pCurrImg->pOrigYUV1[2];
+	}
 
 	for (s32FrameNr = pCurrImg->s32CurrFrameNr; s32FrameNr < pCurrImg->s32FrameNum; s32FrameNr ++)
 	{
@@ -1403,8 +1417,10 @@ void CImageDlg::free_resource()
 		pFile->Close();
 		delete(pFile);
 	}
-
-	free(pYUVBuff);
+	if (u8BitFormat==10)
+	    free(pYUVBuff);
+	else
+		free(pYUVBuff1);
 	GlobalFree(hloc);
 
 	MBInfoDlg.talbeFont.DeleteObject();

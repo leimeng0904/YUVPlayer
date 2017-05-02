@@ -797,9 +797,24 @@ void CChildDlg::get_pixel_value()
     int32	j;
     int32	s32LumaWidth	 = s32Width;
     int32	s32ChroWidth	 = s32Width >> 1;
-    uint16	*pLuma		 = pOrigYUV[0] + (s32ViewMBy * s32LumaWidth + s32ViewMBx);
-    uint16	*pCb		 = pOrigYUV[1] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
-    uint16	*pCr		 = pOrigYUV[2] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
+	uint16	*pLuma;
+	uint16	*pCb;
+	uint16	*pCr;
+	uint8	*pLuma1;
+	uint8	*pCb1;
+	uint8	*pCr1;
+	if (u8BitFormat == 10)
+	{
+			pLuma = pOrigYUV[0] + (s32ViewMBy * s32LumaWidth + s32ViewMBx);
+			pCb = pOrigYUV[1] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
+			pCr = pOrigYUV[2] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
+	}
+	else
+	{
+		pLuma1 = pOrigYUV1[0] + (s32ViewMBy * s32LumaWidth + s32ViewMBx);
+		pCb1 = pOrigYUV1[1] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
+		pCr1 = pOrigYUV1[2] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
+	}
     
     
     //++ 启用临界区保护
@@ -817,19 +832,28 @@ void CChildDlg::get_pixel_value()
     {
         for (i = 1; i < 1 + u8LumaPointNumX; i ++)
         {
-            MBInfoDlg.pixelValue[j][i]	 = pLuma[(j - 1) * s32LumaWidth + (i - 1)];
+			if (u8BitFormat == 10)
+			  MBInfoDlg.pixelValue[j][i]= pLuma[(j - 1) * s32LumaWidth + (i - 1)];
+			else
+			  MBInfoDlg.pixelValue[j][i] = pLuma1[(j - 1) * s32LumaWidth + (i - 1)];
         }
     }
     for (j = 18; j < 18 + u8ChroPointNumY; j ++)
     {
         for (i = 1; i < 1 + u8ChroPointNumX; i ++)
         {
-            MBInfoDlg.pixelValue[j][i]	 = pCb[(j - 18) * s32ChroWidth + (i - 1)];
+			if (u8BitFormat == 10)
+			   MBInfoDlg.pixelValue[j][i]	 = pCb[(j - 18) * s32ChroWidth + (i - 1)];
+			else
+			   MBInfoDlg.pixelValue[j][i] = pCb1[(j - 18) * s32ChroWidth + (i - 1)];
         }
         
         for (i = 9; i < 9 + u8ChroPointNumX; i ++)
         {
-            MBInfoDlg.pixelValue[j][i]	 = pCr[(j - 18) * s32ChroWidth + (i - 9)];
+			if (u8BitFormat == 10)
+			  MBInfoDlg.pixelValue[j][i]	 = pCr[(j - 18) * s32ChroWidth + (i - 9)];
+			else
+			  MBInfoDlg.pixelValue[j][i] = pCr1[(j - 18) * s32ChroWidth + (i - 1)];
         }
     }
 }
