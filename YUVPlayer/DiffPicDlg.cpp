@@ -71,6 +71,7 @@ int32 CDiffPicDlg::initial()
 	u8DiffMode			= BIN_MODE;
 	s8DlgIdx			= 2;   //++ 两图对比只可能有两幅图像，该值为 2 才能复用 adjust_window_position 函数
     u8SampleFormat		= pImage0->u8SampleFormat;
+	u8BitFormat         = pImage0->u8BitFormat;
 	s32Width			= pImage0->s32SrcWidth;
 	s32Height			= pImage0->s32SrcHeight;
 	s32ZoomWidth		= (pImage0->s32ZoomWidth != pImage1->s32ZoomWidth) ? s32Width : pImage0->s32ZoomWidth;
@@ -94,10 +95,18 @@ int32 CDiffPicDlg::initial()
 	{
 		return FAILED_YUVPlayer;
 	}
-
-	pOrigYUV[0]			= pReadYUV[0];
-	pOrigYUV[1]			= pReadYUV[1];
-	pOrigYUV[2]			= pReadYUV[2];
+	if (u8BitFormat == 10)
+	{
+		pOrigYUV[0] = pReadYUV[0];
+		pOrigYUV[1] = pReadYUV[1];
+		pOrigYUV[2] = pReadYUV[2];
+	}
+	else
+	{
+		pOrigYUV1[0] = pReadYUV1[0];
+		pOrigYUV1[1] = pReadYUV1[1];
+		pOrigYUV1[2] = pReadYUV1[2];
+	}
 
 	set_bmp_parameter();
 
@@ -268,13 +277,23 @@ void CDiffPicDlg::get_one_frame(uint8 u8ImageMode)
 	uint32	u32Offset;
 	uint16	**pYUV1;
 	uint16	**pYUV2;
+	uint8	**pYUV3;
+	uint8	**pYUV4;
 	CYUVPlayerDlg	*pMainDlg	 = (CYUVPlayerDlg *)this->pMainDlg;
 
 
 	bSameFlag	= TRUE;
 	u32Offset	= 0;
-	pYUV1	 = pMainDlg->pImage[0]->pReadYUV;
-	pYUV2	 = pMainDlg->pImage[1]->pReadYUV;
+	if (u8BitFormat == 10)
+	{
+		pYUV1 = pMainDlg->pImage[0]->pReadYUV;
+		pYUV2 = pMainDlg->pImage[1]->pReadYUV;
+	}
+	else
+	{
+		pYUV3 = pMainDlg->pImage[0]->pReadYUV1;
+		pYUV4 = pMainDlg->pImage[1]->pReadYUV1;
+	}
 
 	switch (u8SampleFormat)
 	{
@@ -282,39 +301,78 @@ void CDiffPicDlg::get_one_frame(uint8 u8ImageMode)
 		u32Offset	 = 0;
 		for (j = 0; j < (s32Height >> 1); j++)
 		{
-			for (i = 0; i< (s32Width >> 1); i ++)
-			{
-				int32	s32Diff	 = pYUV2[1][u32Offset] - pYUV1[1][u32Offset];
-				
-				pOrigYUV[1][u32Offset]	 = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
-				bSameFlag	&= (!s32Diff);
-				u32Offset ++;
-			}
+			if (u8BitFormat == 10)
+				for (i = 0; i< (s32Width >> 1); i++)
+				{
+					int32	s32Diff = pYUV2[1][u32Offset] - pYUV1[1][u32Offset];
+					pOrigYUV[1][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
+					bSameFlag &= (!s32Diff);
+					u32Offset++;
+				}
+			else
+			    for (i = 0; i< (s32Width >> 1); i++)
+			    {
+			    	int32	s32Diff = pYUV4[1][u32Offset] - pYUV3[1][u32Offset];
+			    	pOrigYUV1[1][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
+			    	bSameFlag &= (!s32Diff);
+			    	u32Offset++;
+			    }
 		}
 		
 		u32Offset	 = 0;
 		for (j = 0; j < (s32Height >> 1); j++)
 		{
-			for (i = 0; i< (s32Width >> 1); i ++)
+			if (u8BitFormat == 10)
 			{
-				int32	s32Diff	 = pYUV2[2][u32Offset] - pYUV1[2][u32Offset];
-				
-				pOrigYUV[2][u32Offset]	 = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
-				bSameFlag	&= (!s32Diff);
-				u32Offset ++;
+				for (i = 0; i< (s32Width >> 1); i++)
+				{
+					int32	s32Diff = pYUV2[2][u32Offset] - pYUV1[2][u32Offset];
+
+					pOrigYUV[2][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
+					bSameFlag &= (!s32Diff);
+					u32Offset++;
+				}
+			}
+			else
+			{
+				for (i = 0; i< (s32Width >> 1); i++)
+				{
+					int32	s32Diff = pYUV4[2][u32Offset] - pYUV3[2][u32Offset];
+
+					pOrigYUV1[2][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
+					bSameFlag &= (!s32Diff);
+					u32Offset++;
+				}
 			}
 		}
 	case YUV400:
 		u32Offset	 = 0;
-		for (j = 0; j < s32Height; j++)
+		if (u8BitFormat == 10)
 		{
-			for (i = 0; i< s32Width; i ++)
+			for (j = 0; j < s32Height; j++)
 			{
-				int32	s32Diff	 = pYUV2[0][u32Offset] - pYUV1[0][u32Offset];
-				
-				pOrigYUV[0][u32Offset]	 = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
-				bSameFlag	&= (!s32Diff);
-				u32Offset ++;
+				for (i = 0; i< s32Width; i++)
+				{
+					int32	s32Diff = pYUV2[0][u32Offset] - pYUV1[0][u32Offset];
+
+					pOrigYUV[0][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
+					bSameFlag &= (!s32Diff);
+					u32Offset++;
+				}
+			}
+		}
+		else
+		{
+			for (j = 0; j < s32Height; j++)
+			{
+				for (i = 0; i< s32Width; i++)
+				{
+					int32	s32Diff = pYUV4[0][u32Offset] - pYUV3[0][u32Offset];
+
+					pOrigYUV1[0][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
+					bSameFlag &= (!s32Diff);
+					u32Offset++;
+				}
 			}
 		}
 		
