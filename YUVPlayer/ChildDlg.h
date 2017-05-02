@@ -13,7 +13,8 @@ public:
 
     int8	s8DlgIdx;
 	uint8	bSizeChanged;	//++ 窗口大小是否改变
-    uint8   u8SampleFormat;
+    uint8   u8SampleFormat; //采样格式
+	uint8   u8BitFormat; //Bit格式
     int32	s32MBXNum;		//++ 一行宏块个数
     int32	s32MBYNum;		//++ 一列宏块个数
     int32	s32MBXIdx;		//++ 当前宏块所在列号（缩放前）
@@ -46,14 +47,14 @@ public:
     CMBInfoDlg		MBInfoDlg;
     PCRITICAL_SECTION pCriticalSection;
 	/********************************************改******************************************/
-    /*LPBYTE	pYUVBuff;
-    LPBYTE	pRGBBuff;
-    LPBYTE	pReadYUV[3];
-    LPBYTE	pOrigYUV[3];
-    LPBYTE	pMirrYUV[3];
-    LPBYTE	pRotaYUV[3];
-    LPBYTE	pDisplayLuma;
-    LPBYTE	pDisplayChro;*/
+    LPBYTE	pYUVBuff1;
+    LPBYTE	pRGBBuff1;
+    LPBYTE	pReadYUV1[3];
+    LPBYTE	pOrigYUV1[3];
+    LPBYTE	pMirrYUV1[3];
+    LPBYTE	pRotaYUV1[3];
+    LPBYTE	pDisplayLuma1;
+    LPBYTE	pDisplayChro1;
 	LPWORD	pYUVBuff;
 	LPBYTE pRGBBuff;
 	LPWORD pReadYUV[3];
@@ -83,6 +84,8 @@ public:
     void	color_space_convert(uint8 u8ImageMode);
 	void	YV12_to_RGB24(uint16* pu8Y, uint16* pu8U, uint16* pu8V);
 	void	YUY2_to_RGB24(uint16 *pu8RGBData, uint16 *pu8YUVData);
+	void	YV12_to_RGB(uint8* pu8Y, uint8* pu8U, uint8* pu8V);
+	void	YUY2_to_RGB(uint8 *pu8RGBData, uint8 *pu8YUVData);
     void	set_image_mode(uint8 u8ImageMode);
     void	draw_dash_frame(CRect &rect);
 	void	change_size(LPRECT pRect);

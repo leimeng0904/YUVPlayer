@@ -69,6 +69,7 @@ CYUVPlayerDlg::CYUVPlayerDlg(CWnd* pParent /*=NULL*/)
 	m_sZoomSize			 = _T("100");
 	m_sFrameRate		 = _T("30");
 	m_sStartFrameNr		 = _T("1");
+	m_sBitFormat         = _T("10bit");
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -81,6 +82,7 @@ void CYUVPlayerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_FRAME_RATE, m_frameRate);
 	DDX_Control(pDX, IDC_ZOOM, m_zoomSize);
 	DDX_Control(pDX, IDC_SAMPLE_FORMAT, m_sampleFormat);
+	DDX_Control(pDX, IDC_Bit, m_bitFormat);
 	DDX_Control(pDX, IDC_FRAME_SIZE, m_frameSize);
 	DDX_Control(pDX, IDC_VIEW_MODE, m_viewMode);
 	DDX_Control(pDX, IDC_COMP_MODE, m_compMode);
@@ -96,6 +98,7 @@ void CYUVPlayerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BACKWARD_ONE_STEP, m_bkOneStep);
 	DDX_CBString(pDX, IDC_FRAME_SIZE, m_sFrameSize);
 	DDX_CBString(pDX, IDC_SAMPLE_FORMAT, m_sSampleFormat);
+	DDX_CBString(pDX, IDC_Bit, m_sBitFormat);
 	DDX_CBString(pDX, IDC_ZOOM, m_sZoomSize);
 	DDX_Text(pDX, IDC_FRAME_RATE, m_sFrameRate);
 	DDX_Text(pDX, IDC_START_FRAME, m_sStartFrameNr);
@@ -130,6 +133,9 @@ BEGIN_MESSAGE_MAP(CYUVPlayerDlg, CDialog)
 	ON_MESSAGE(WM_MYMESSAGE_3, translate_message)
 	ON_MESSAGE(WM_MYMESSAGE_4, adjust_image)
 	//}}AFX_MSG_MAP
+	ON_CBN_SELCHANGE(IDC_FRAME_SIZE, &CYUVPlayerDlg::OnCbnSelchangeFrameSize)
+	ON_CBN_SELCHANGE(IDC_Bit, &CYUVPlayerDlg::OnCbnSelchangeBit)
+	ON_CBN_SELCHANGE(IDC_SAMPLE_FORMAT, &CYUVPlayerDlg::OnCbnSelchangeSampleFormat)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -500,10 +506,12 @@ int32 CYUVPlayerDlg::creat_image_window(CString CurrFilePath)
 	pNewImg->s32CurrFrameNr		= s32StartFrameNr;
 	pNewImg->frameSize			= m_sFrameSize;
 	pNewImg->sampleFormat		= m_sSampleFormat;
+	pNewImg->bitFormat          = m_sBitFormat;
 	pNewImg->zoomSize			= m_sZoomSize;
 	pNewImg->pFile				= pCurrFile;
 	pNewImg->s8DlgIdx			= s8ImgNum;
     pNewImg->u8SampleFormat		= u8SampleFormat;
+	pNewImg->u8BitFormat        = u8BitFormat;
 	pNewImg->s32SrcWidth		= s32Width;
 	pNewImg->s32SrcHeight		= s32Height;
 	pNewImg->s32Width			= s32Width;
@@ -550,6 +558,7 @@ void CYUVPlayerDlg::set_default_parameter_value()
 
 	m_sFrameSize	= pImage[0]->frameSize;
 	m_sSampleFormat	= pImage[0]->sampleFormat;
+	m_sBitFormat    = pImage[0]->bitFormat;
 	m_sZoomSize		= pImage[0]->zoomSize;
 	
 	UpdateData(FALSE);
@@ -565,7 +574,6 @@ int32 CYUVPlayerDlg::get_input_parameter()
 	if ((u8PlayMode == VIEW_MODE) || (s8ImgNum == 0))
 	{
 		int32	s32Ret;
-
 		s32Ret	= get_sample_ratio();
 		if (s32Ret == FAILED_YUVPlayer)
 		{
@@ -583,12 +591,20 @@ int32 CYUVPlayerDlg::get_input_parameter()
 		{
 			return FAILED_YUVPlayer;
 		}
+		
+		s32Ret = get_bit_ratio();
+		if (s32Ret == FAILED_YUVPlayer)
+		{
+			return FAILED_YUVPlayer;
+		}
+
 	}
 	else
 	{
 		s32Width		= pImage[0]->s32Width;
 		s32Height		= pImage[0]->s32Height;
 		u8SampleFormat	= pImage[0]->u8SampleFormat;
+		u8BitFormat     = pImage[0]->u8BitFormat;
 	}
 
 	fFrameRate			 = atof(m_sFrameRate);
@@ -695,6 +711,31 @@ int32 CYUVPlayerDlg::get_zoom_ratio()
 	return SUCCEEDED_YUVPlayer;
 }
 
+
+int32 CYUVPlayerDlg::get_bit_ratio()
+{
+	int32	s32ItemIdx = m_bitFormat.GetCurSel();
+
+	switch (s32ItemIdx)
+	{
+	case 0:
+		u8BitFormat = 10;
+		break;
+
+	case 1:
+		u8BitFormat = 8;
+		break;
+
+	default:
+		AfxMessageBox("bit格式无效！", MB_ICONERROR);
+		return FAILED_YUVPlayer;
+		break;
+	}
+
+	return SUCCEEDED_YUVPlayer;
+
+
+}
 int32 CYUVPlayerDlg::get_frame_size() 
 {
 	// TODO: Add your control notification handler code here
@@ -867,6 +908,10 @@ void CYUVPlayerDlg::set_comp_mode()
         {
             AfxMessageBox("两幅图像采样格式必须一致！", MB_ICONERROR);
         }
+		else if (pImage[0]->u8BitFormat != pImage[1]->u8BitFormat)
+		{
+			AfxMessageBox("两幅图像Bit格式必须一致！", MB_ICONERROR);
+		}
         else if ((pImage[0]->s16RotateAngle != pImage[1]->s16RotateAngle))
         {
             AfxMessageBox("两幅图像旋转角度必须一致！", MB_ICONERROR);
@@ -1624,6 +1669,7 @@ LRESULT CYUVPlayerDlg::adjust_image(WPARAM wParam, LPARAM lParam)
 	pNewImg->pFile				= pCurrFile;
 	pNewImg->s8DlgIdx			= pCurrImage->s8DlgIdx;
     pNewImg->u8SampleFormat		= pCurrImage->u8SampleFormat;
+	pNewImg->u8BitFormat        = pCurrImage->u8BitFormat;
 	pNewImg->s32SrcWidth		= pCurrImage->s32SrcWidth;
 	pNewImg->s32SrcHeight		= pCurrImage->s32SrcHeight;
 	pNewImg->s32Width			= (lParam == 0) ? pCurrImage->s32Height : pCurrImage->s32Width;
@@ -1915,4 +1961,24 @@ void CYUVPlayerDlg::OnRButtonUp(UINT nFlags, CPoint point)
 	SetWindowPos(&wndTop, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
 	
 	CDialog::OnRButtonUp(nFlags, point);
+}
+
+
+
+
+
+
+
+void CYUVPlayerDlg::OnCbnSelchangeSampleFormat()
+{
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+void CYUVPlayerDlg::OnCbnSelchangeBit()
+{
+	// TODO:  在此添加控件通知处理程序代码
+}
+void CYUVPlayerDlg::OnCbnSelchangeFrameSize()
+{
+	// TODO:  在此添加控件通知处理程序代码
 }

@@ -487,6 +487,287 @@ void CImageDlg::mirror_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV)
 	pOrigYUV[2]	= pMirrYUV[2];
 }
 
+void CImageDlg::rotate_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV)
+{
+	int32	i, j;
+	uint8*	pu8SrcY;
+	uint8*	pu8SrcU;
+	uint8*	pu8SrcV;
+	uint8*	pu8DstY;
+	uint8*	pu8DstU;
+	uint8*	pu8DstV;
+
+
+	if (s16RotateAngle == 0)
+	{
+		pOrigYUV1[0] = pSrcY;
+		pOrigYUV1[1] = pSrcU;
+		pOrigYUV1[2] = pSrcV;
+
+		return;
+	}
+
+	if (s16RotateAngle == 90)
+	{
+		switch (u8SampleFormat)
+		{
+		case YUV420:
+			pu8SrcU = pSrcU + (s32SrcWidth >> 1);
+			pu8SrcV = pSrcV + (s32SrcWidth >> 1);
+			for (j = 0; j < (s32SrcHeight >> 1); j++)
+			{
+				pu8DstU = pRotaYUV1[1] + u32ChroPicSize - j;
+				pu8DstV = pRotaYUV1[2] + u32ChroPicSize - j;
+				for (i = 0; i < (s32SrcWidth >> 1); i++)
+				{
+					pu8DstU[0] = pu8SrcU[-i];
+					pu8DstV[0] = pu8SrcV[-i];
+					pu8DstU -= (s32SrcHeight >> 1);
+					pu8DstV -= (s32SrcHeight >> 1);
+				}
+
+				pu8SrcU += (s32SrcWidth >> 1);
+				pu8SrcV += (s32SrcWidth >> 1);
+			}
+		case YUV400:
+			pu8SrcY = pSrcY + s32SrcWidth - 1;
+			for (j = 0; j < s32SrcHeight; j++)
+			{
+				pu8DstY = pRotaYUV1[0] + u32LumaPicSize - j - 1;
+
+				for (i = 0; i < s32SrcWidth; i++)
+				{
+					pu8DstY[0] = pu8SrcY[-i];
+					pu8DstY -= s32SrcHeight;
+				}
+
+				pu8SrcY += s32SrcWidth;
+			}
+
+			break;
+		default:
+			break;
+		}
+	}
+	else if (s16RotateAngle == 180)
+	{
+		switch (u8SampleFormat)
+		{
+		case YUV420:
+			pu8SrcU = pSrcU;
+			pu8SrcV = pSrcV;
+			pu8DstU = pRotaYUV1[1] + u32ChroPicSize - 1;
+			pu8DstV = pRotaYUV1[2] + u32ChroPicSize - 1;
+			for (j = 0; j < (s32SrcHeight >> 1); j++)
+			{
+				for (i = 0; i < (s32SrcWidth >> 1); i++)
+				{
+					pu8DstU[-i] = pu8SrcU[i];
+					pu8DstV[-i] = pu8SrcV[i];
+				}
+
+				pu8SrcU += (s32SrcWidth >> 1);
+				pu8SrcV += (s32SrcWidth >> 1);
+				pu8DstU -= (s32SrcWidth >> 1);
+				pu8DstV -= (s32SrcWidth >> 1);
+			}
+		case YUV400:
+			pu8SrcY = pSrcY;
+			pu8DstY = pRotaYUV1[0] + u32LumaPicSize - 1;
+			for (j = 0; j < s32SrcHeight; j++)
+			{
+				for (i = 0; i < s32SrcWidth; i++)
+				{
+					pu8DstY[-i] = pu8SrcY[i];
+				}
+
+				pu8SrcY += s32SrcWidth;
+				pu8DstY -= s32SrcWidth;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	else if (s16RotateAngle == 270)
+	{
+		switch (u8SampleFormat)
+		{
+		case YUV420:
+			pu8SrcU = pSrcU;
+			pu8SrcV = pSrcV;
+			for (j = 0; j < (s32SrcHeight >> 1); j++)
+			{
+				pu8DstU = pRotaYUV1[1] + u32ChroPicSize - (s32SrcHeight >> 1) + j;
+				pu8DstV = pRotaYUV1[2] + u32ChroPicSize - (s32SrcHeight >> 1) + j;
+				for (i = 0; i < (s32SrcWidth >> 1); i++)
+				{
+					pu8DstU[0] = pu8SrcU[i];
+					pu8DstV[0] = pu8SrcV[i];
+					pu8DstU -= (s32SrcHeight >> 1);
+					pu8DstV -= (s32SrcHeight >> 1);
+				}
+
+				pu8SrcU += (s32SrcWidth >> 1);
+				pu8SrcV += (s32SrcWidth >> 1);
+			}
+		case YUV400:
+			pu8SrcY = pSrcY;
+			for (j = 0; j < s32SrcHeight; j++)
+			{
+				pu8DstY = pRotaYUV1[0] + u32LumaPicSize - s32SrcHeight + j;
+
+				for (i = 0; i < s32SrcWidth; i++)
+				{
+					pu8DstY[0] = pu8SrcY[i];
+					pu8DstY -= s32SrcHeight;
+				}
+
+				pu8SrcY += s32SrcWidth;
+			}
+
+			break;
+		default:
+			break;
+		}
+	}
+
+	pOrigYUV1[0] = pRotaYUV1[0];
+	pOrigYUV1[1] = pRotaYUV1[1];
+	pOrigYUV1[2] = pRotaYUV1[2];
+}
+
+void CImageDlg::mirror_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV)
+{
+	int32	i, j;
+	uint8*	pu8SrcY;
+	uint8*	pu8SrcU;
+	uint8*	pu8SrcV;
+	uint8*	pu8DstY;
+	uint8*	pu8DstU;
+	uint8*	pu8DstV;
+
+
+	if (u8MirrorMode == MIRROR_NONE)
+	{
+		pOrigYUV1[0] = pSrcY;
+		pOrigYUV1[1] = pSrcU;
+		pOrigYUV1[2] = pSrcV;
+
+		return;
+	}
+
+	if (u8MirrorMode == MIRROR_BOTH)
+	{
+		switch (u8SampleFormat)
+		{
+		case YUV420:
+			for (i = 0; i < u32ChroPicSize; i++)
+			{
+				pMirrYUV1[1][i] = pSrcU[u32ChroPicSize - 1 - i];
+				pMirrYUV1[2][i] = pSrcV[u32ChroPicSize - 1 - i];
+			}
+		case YUV400:
+			for (i = 0; i < u32LumaPicSize; i++)
+			{
+				pMirrYUV1[0][i] = pSrcY[u32LumaPicSize - 1 - i];
+			}
+
+			break;
+		default:
+			break;
+		}
+	}
+	else if (u8MirrorMode == MIRROR_HORI)
+	{
+		switch (u8SampleFormat)
+		{
+		case YUV420:
+			pu8SrcU = pSrcU;
+			pu8SrcV = pSrcV;
+			pu8DstU = pMirrYUV1[1];
+			pu8DstV = pMirrYUV1[2];
+			for (j = 0; j < (s32Height >> 1); j++)
+			{
+				for (i = 0; i < (s32Width >> 1); i++)
+				{
+					pu8DstU[i] = pu8SrcU[(s32Width >> 1) - 1 - i];
+					pu8DstV[i] = pu8SrcV[(s32Width >> 1) - 1 - i];
+				}
+
+				pu8SrcU += (s32Width >> 1);
+				pu8DstU += (s32Width >> 1);
+				pu8SrcV += (s32Width >> 1);
+				pu8DstV += (s32Width >> 1);
+			}
+		case YUV400:
+			pu8SrcY = pSrcY;
+			pu8DstY = pMirrYUV1[0];
+			for (j = 0; j < s32Height; j++)
+			{
+				for (i = 0; i < s32Width; i++)
+				{
+					pu8DstY[i] = pu8SrcY[s32Width - 1 - i];
+				}
+
+				pu8DstY += s32Width;
+				pu8SrcY += s32Width;
+			}
+
+			break;
+		default:
+			break;
+		}
+	}
+	else if (u8MirrorMode == MIRROR_VERT)
+	{
+		switch (u8SampleFormat)
+		{
+		case YUV420:
+			pu8SrcU = pSrcU;
+			pu8SrcV = pSrcV;
+			pu8DstU = pMirrYUV1[1] + u32ChroPicSize;
+			pu8DstV = pMirrYUV1[2] + u32ChroPicSize;
+			for (j = 0; j < (s32Height >> 1); j++)
+			{
+				pu8DstU -= (s32Width >> 1);
+				pu8DstV -= (s32Width >> 1);
+
+				for (i = 0; i < (s32Width >> 1); i++)
+				{
+					memcpy(pu8DstU, pu8SrcU, (s32Width >> 1));
+					memcpy(pu8DstV, pu8SrcV, (s32Width >> 1));
+				}
+
+				pu8SrcU += (s32Width >> 1);
+				pu8SrcV += (s32Width >> 1);
+			}
+		case YUV400:
+			pu8SrcY = pSrcY;
+			pu8DstY = pMirrYUV1[0] + u32LumaPicSize;
+			for (j = 0; j < s32Height; j++)
+			{
+				pu8DstY -= s32Width;
+
+				for (i = 0; i < s32Width; i++)
+				{
+					memcpy(pu8DstY, pu8SrcY, s32Width);
+				}
+
+				pu8SrcY += s32Width;
+			}
+
+			break;
+		default:
+			break;
+		}
+	}
+
+	pOrigYUV1[0] = pMirrYUV1[0];
+	pOrigYUV1[1] = pMirrYUV1[1];
+	pOrigYUV1[2] = pMirrYUV1[2];
+}
+
 int32 CImageDlg::read_one_frame(uint8 u8ImageMode)
 {
 	//++ 启用临界区保护
@@ -504,28 +785,56 @@ int32 CImageDlg::read_one_frame(uint8 u8ImageMode)
 		break;
 		
 	case YUV420:
-		if (u32LumaPicSize<<1 != pFile->Read(pReadYUV[0], u32LumaPicSize<<1))
-		{
-			return EOF_YUVPlayer;
-		}
-		if (u32ChroPicSize<<1 != pFile->Read(pReadYUV[1], u32ChroPicSize<<1))
-		{
-			return EOF_YUVPlayer;
-		}
-		if (u32ChroPicSize<<1 != pFile->Read(pReadYUV[2], u32ChroPicSize<<1))
-		{
-			return EOF_YUVPlayer;
-		}
-		
-		break;
-		
+	{
+	  if (u8BitFormat == 10)
+	     {
+	  	   if (u32LumaPicSize << 1 != pFile->Read(pReadYUV[0], u32LumaPicSize << 1))
+	  	   {
+	  		   return EOF_YUVPlayer;
+	  	   }
+	  	   if (u32ChroPicSize << 1 != pFile->Read(pReadYUV[1], u32ChroPicSize << 1))
+	  	   {
+	  		   return EOF_YUVPlayer;
+	  	   }
+	  	   if (u32ChroPicSize << 1 != pFile->Read(pReadYUV[2], u32ChroPicSize << 1))
+	  	   {
+	  		   return EOF_YUVPlayer;
+	  	   }
+	  
+	  	   break;
+	     }
+	  else
+	  {
+		  if (u32LumaPicSize != pFile->Read(pReadYUV1[0], u32LumaPicSize))
+		  {
+			  return EOF_YUVPlayer;
+		  }
+		  if (u32ChroPicSize != pFile->Read(pReadYUV1[1], u32ChroPicSize))
+		  {
+			  return EOF_YUVPlayer;
+		  }
+		  if (u32ChroPicSize != pFile->Read(pReadYUV1[2], u32ChroPicSize))
+		  {
+			  return EOF_YUVPlayer;
+		  }
+
+		  break;
+	  }
+	}	
 	default:
 		
 		break;
 	}
-
-	rotate_image(pReadYUV[0], pReadYUV[1], pReadYUV[2]);
-	mirror_image(pOrigYUV[0], pOrigYUV[1], pOrigYUV[2]);
+	if (u8BitFormat == 10)
+	{
+		rotate_image(pReadYUV[0], pReadYUV[1], pReadYUV[2]);
+		mirror_image(pOrigYUV[0], pOrigYUV[1], pOrigYUV[2]);
+	}
+	else
+	{
+		rotate_image(pReadYUV1[0], pReadYUV1[1], pReadYUV1[2]);
+		mirror_image(pOrigYUV1[0], pOrigYUV1[1], pOrigYUV1[2]);
+	}
 
 	color_space_convert(u8ImageMode);
 

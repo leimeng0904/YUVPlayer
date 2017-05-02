@@ -37,7 +37,8 @@ public:
 	uint8	u8PlayMode;			//++ 播放采用对比模式还是浏览模式
 	uint8	u8EOFNum;			//++ 达到文件尾的图像个数
 	uint8	u8EOHNum;			//++ 达到文件头的图像个数
-    uint8   u8SampleFormat;
+    uint8   u8SampleFormat;     //++ 图像采样格式
+	uint8   u8BitFormat;        //++ 图像bit格式
     int32	s32Width;			//++ 图像原始宽度
     int32	s32Height;			//++ 图像原始高度
     int32	s32ZoomWidth;		//++ 缩放后的宽度
@@ -75,6 +76,7 @@ public:
 	CComboBox	m_zoomSize;
 	CComboBox	m_sampleFormat;
 	CComboBox	m_frameSize;
+	CComboBox   m_bitFormat;
 	CButton	m_viewMode;
 	CButton	m_compMode;
 	CButton	m_resetPic;
@@ -89,6 +91,7 @@ public:
 	CButton	m_bkOneStep;
 	CString	m_sFrameSize;
 	CString	m_sSampleFormat;
+	CString	m_sBitFormat;
 	CString	m_sZoomSize;
 	CString	m_sFrameRate;
 	CString	m_sStartFrameNr;
@@ -156,8 +159,13 @@ private:
 	int32	get_sample_ratio();
 	int32	get_zoom_ratio();
 	int32	get_frame_size();
+	int32	get_bit_ratio();
 	int32	get_input_parameter();
 	int32	creat_image_window(CString CurrFilePath);
+public:
+	afx_msg void OnCbnSelchangeFrameSize();
+	afx_msg void OnCbnSelchangeBit();
+	afx_msg void OnCbnSelchangeSampleFormat();
 };
 
 //{{AFX_INSERT_LOCATION}}

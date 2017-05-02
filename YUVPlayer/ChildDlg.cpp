@@ -42,6 +42,21 @@ CChildDlg::CChildDlg(UINT nID, CWnd* pParent /*=NULL*/)
 	pDisplayLuma		= NULL;
 	pDisplayChro		= NULL;
 	pRGBBuff			= NULL;
+	pReadYUV1[0]         = NULL;
+	pReadYUV1[1]         = NULL;
+	pReadYUV1[2]         = NULL;
+	pOrigYUV1[0]         = NULL;
+	pOrigYUV1[1]         = NULL;
+	pOrigYUV1[2]         = NULL;
+	pMirrYUV1[0]         = NULL;
+	pMirrYUV1[1]         = NULL;
+	pMirrYUV1[2]         = NULL;
+	pRotaYUV1[0]         = NULL;
+	pRotaYUV1[1]         = NULL;
+	pRotaYUV1[2]         = NULL;
+	pDisplayLuma1        = NULL;
+	pDisplayChro1        = NULL;
+	pRGBBuff1 = NULL;
 	
     mouseMenu.LoadMenu(IDR_MOUSE_MENU);//装载自定义的右键菜单
     pSubMenu   = mouseMenu.GetSubMenu(0);//获取第一个弹出菜单，所以第一个菜单必须有子菜单
@@ -64,28 +79,54 @@ int32 CChildDlg::malloc_memory()
 	//u32MemorySize += (((s32Width * 3 + 3) >> 2) << 2) * s32Height;	//++ RGB 内存空间
 
 	
-    
-	pYUVBuff = (LPWORD)malloc(u32MemorySize);
-	pRGBBuff = (LPBYTE)malloc((((s32Width * 3 + 3) >> 2) << 2) * s32Height);
-    if (NULL == pYUVBuff)
-    {
-        AfxMessageBox("分配内存错误！\n", MB_ICONERROR);
-        
-        return FAILED_YUVPlayer;
-    }
-    pReadYUV[0]		= pYUVBuff;
-	pReadYUV[1] = pReadYUV[0] + u32LumaBuffSize ;
-	pReadYUV[2] = pReadYUV[1] + u32ChroBuffSize ;
-	pMirrYUV[0] = pReadYUV[2] + u32ChroBuffSize ;
-	pMirrYUV[1] = pMirrYUV[0] + u32LumaBuffSize ;
-	pMirrYUV[2] = pMirrYUV[1] + u32ChroBuffSize ;
-	pRotaYUV[0] = pMirrYUV[2] + u32ChroBuffSize ;
-	pRotaYUV[1] = pRotaYUV[0] + u32LumaBuffSize ;
-	pRotaYUV[2] = pRotaYUV[1] + u32ChroBuffSize ;
-	pDisplayLuma = pRotaYUV[2] + u32ChroBuffSize;
-	pDisplayChro = pDisplayLuma + u32LumaPicSize;
-	//pRGBBuff =LPBYTE(pDisplayChro+ u32ChroPicSize);
-	memset(pYUVBuff, 128, u32MemorySize);		   
+	if (u8BitFormat == 10)
+	{
+		pYUVBuff = (LPWORD)malloc(u32MemorySize);
+		pRGBBuff = (LPBYTE)malloc((((s32Width * 3 + 3) >> 2) << 2) * s32Height);
+		if (NULL == pYUVBuff)
+		{
+			AfxMessageBox("分配内存错误！\n", MB_ICONERROR);
+
+			return FAILED_YUVPlayer;
+		}
+		pReadYUV[0] = pYUVBuff;
+		pReadYUV[1] = pReadYUV[0] + u32LumaBuffSize;
+		pReadYUV[2] = pReadYUV[1] + u32ChroBuffSize;
+		pMirrYUV[0] = pReadYUV[2] + u32ChroBuffSize;
+		pMirrYUV[1] = pMirrYUV[0] + u32LumaBuffSize;
+		pMirrYUV[2] = pMirrYUV[1] + u32ChroBuffSize;
+		pRotaYUV[0] = pMirrYUV[2] + u32ChroBuffSize;
+		pRotaYUV[1] = pRotaYUV[0] + u32LumaBuffSize;
+		pRotaYUV[2] = pRotaYUV[1] + u32ChroBuffSize;
+		pDisplayLuma = pRotaYUV[2] + u32ChroBuffSize;
+		pDisplayChro = pDisplayLuma + u32LumaPicSize;
+		//pRGBBuff =LPBYTE(pDisplayChro+ u32ChroPicSize);
+		memset(pYUVBuff, 128, u32MemorySize);
+	}
+	else
+	{
+		u32MemorySize += (((s32Width * 3 + 3) >> 2) << 2) * s32Height;
+		pYUVBuff1 = (LPBYTE)malloc(u32MemorySize);
+		if (NULL == pYUVBuff1)
+		{
+			AfxMessageBox("分配内存错误！\n", MB_ICONERROR);
+
+			return FAILED_YUVPlayer;
+		}
+		pReadYUV1[0] = pYUVBuff1;
+		pReadYUV1[1] = pReadYUV1[0] + u32LumaBuffSize;
+		pReadYUV1[2] = pReadYUV1[1] + u32ChroBuffSize;
+		pMirrYUV1[0] = pReadYUV1[2] + u32ChroBuffSize;
+		pMirrYUV1[1] = pMirrYUV1[0] + u32LumaBuffSize;
+		pMirrYUV1[2] = pMirrYUV1[1] + u32ChroBuffSize;
+		pRotaYUV1[0] = pMirrYUV1[2] + u32ChroBuffSize;
+		pRotaYUV1[1] = pRotaYUV1[0] + u32LumaBuffSize;
+		pRotaYUV1[2] = pRotaYUV1[1] + u32ChroBuffSize;
+		pDisplayLuma1 = pRotaYUV1[2] + u32ChroBuffSize;
+		pDisplayChro1 = pDisplayLuma1 + u32LumaPicSize;
+		pRGBBuff1 = pDisplayChro1 + u32ChroPicSize;
+		memset(pYUVBuff1, 128, u32MemorySize);
+	}
     
     hloc = GlobalAlloc(GMEM_ZEROINIT | GMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256));
     if (NULL == hloc)
@@ -146,8 +187,10 @@ int32 CChildDlg::show_image(CDC *pDC)
     
     BmpInfo->bmiHeader.biBitCount    = 24;
     pDC->SetStretchBltMode(COLORONCOLOR);
-    s32Ret	 = StretchDIBits(pDC->m_hDC, 0, 0, s32ZoomWidth, s32ZoomHeight, 0, 0, s32Width, s32Height, pRGBBuff, BmpInfo, DIB_RGB_COLORS, SRCCOPY);
-    
+	if (u8BitFormat==10)
+        s32Ret	 = StretchDIBits(pDC->m_hDC, 0, 0, s32ZoomWidth, s32ZoomHeight, 0, 0, s32Width, s32Height, pRGBBuff, BmpInfo, DIB_RGB_COLORS, SRCCOPY);
+	else
+		s32Ret = StretchDIBits(pDC->m_hDC, 0, 0, s32ZoomWidth, s32ZoomHeight, 0, 0, s32Width, s32Height, pRGBBuff1, BmpInfo, DIB_RGB_COLORS, SRCCOPY);
     if (s32Ret == GDI_ERROR)
     {
         return FAILED_YUVPlayer;
@@ -158,65 +201,88 @@ int32 CChildDlg::show_image(CDC *pDC)
 
 void CChildDlg::color_space_convert(uint8 u8ImageMode)
 {
-    int32	i;
-    int32	j;
-    int32	s32ChroWidth;
-    int32	s32ChroHeigth;
+	int32	i;
+	int32	j;
+	int32	s32ChroWidth;
+	int32	s32ChroHeigth;
 
-    
-    switch (u8SampleFormat)
-    {
-    case YUV400:
-    case YUV420:
-        s32ChroWidth    = s32Width >> 1;
-        s32ChroHeigth   = s32Height >> 1;
 
-        break;
+	switch (u8SampleFormat)
+	{
+	case YUV400:
+	case YUV420:
+		s32ChroWidth = s32Width >> 1;
+		s32ChroHeigth = s32Height >> 1;
 
-    default:
+		break;
 
-        break;
-    }
-    
-    switch(u8ImageMode)
-    {
-    case IMAGE_YUV:
-        YV12_to_RGB24(pOrigYUV[0], pOrigYUV[1], pOrigYUV[2]);
+	default:
 
-        break;
-        
-    case IMAGE_Y:
-        YV12_to_RGB24(pOrigYUV[0], pDisplayChro, pDisplayChro);
-        break;
-        
-    case IMAGE_U:
-        for (j = 0; j < s32Height; j ++)
-        {
-            for (i = 0; i < s32Width; i ++)
-            {
-                pDisplayLuma[j * s32Width + i]	 = pOrigYUV[1][(j >> 1) * s32ChroWidth + (i >> 1)];
-            }
-        }
-        YV12_to_RGB24(pDisplayLuma, pDisplayChro, pDisplayChro);
+		break;
+	}
 
-        break;
-        
-    case IMAGE_V:
-        for (j = 0; j < s32Height; j ++)
-        {
-            for (i = 0; i < s32Width; i ++)
-            {
-                pDisplayLuma[j * s32Width + i]	 = pOrigYUV[2][(j >> 1) * s32ChroWidth + (i >> 1)];
-            }
-        }
-        YV12_to_RGB24(pDisplayLuma, pDisplayChro, pDisplayChro);
+	switch (u8ImageMode)
+	{
+	case IMAGE_YUV:
+	{
+	   if (u8BitFormat == 10)
+	     YV12_to_RGB24(pOrigYUV[0], pOrigYUV[1], pOrigYUV[2]);
+	   else
+	     YV12_to_RGB(pOrigYUV1[0], pOrigYUV1[1], pOrigYUV1[2]);
+	   break;
+	}
 
-        break;
-        
-    default:
+	case IMAGE_Y:
+	{
+		if (u8BitFormat == 10)
+			YV12_to_RGB24(pOrigYUV[0], pDisplayChro, pDisplayChro);
+		else
+			YV12_to_RGB(pOrigYUV1[0], pDisplayChro1, pDisplayChro1);
+		break;
+	}
 
-        break;
-    }
+	case IMAGE_U:
+	{
+		for (j = 0; j < s32Height; j++)
+		{
+			for (i = 0; i < s32Width; i++)
+			{
+				if (u8BitFormat == 10)
+					pDisplayLuma[j * s32Width + i] = pOrigYUV[1][(j >> 1) * s32ChroWidth + (i >> 1)];
+				else
+					pDisplayLuma1[j * s32Width + i] = pOrigYUV1[1][(j >> 1) * s32ChroWidth + (i >> 1)];
+			}
+		}
+		if (u8BitFormat == 10)
+			YV12_to_RGB24(pDisplayLuma, pDisplayChro, pDisplayChro);
+		else
+			YV12_to_RGB(pDisplayLuma1, pDisplayChro1, pDisplayChro1);
+		break;
+	}
+
+	case IMAGE_V:
+	{
+		for (j = 0; j < s32Height; j++)
+		{
+			for (i = 0; i < s32Width; i++)
+			{
+				if (u8BitFormat == 10)
+					pDisplayLuma[j * s32Width + i] = pOrigYUV[2][(j >> 1) * s32ChroWidth + (i >> 1)];
+				else
+					pDisplayLuma1[j * s32Width + i] = pOrigYUV1[2][(j >> 1) * s32ChroWidth + (i >> 1)];
+			}
+		}
+		if (u8BitFormat == 10)
+			YV12_to_RGB24(pDisplayLuma, pDisplayChro, pDisplayChro);
+		else
+		    YV12_to_RGB(pDisplayLuma1, pDisplayChro1, pDisplayChro1);
+		break;
+	}
+
+	default:
+
+		break;
+	}
 }
 
 void CChildDlg::YV12_to_RGB24(uint16* pu8Y, uint16* pu8U, uint16* pu8V)
@@ -289,9 +355,9 @@ void CChildDlg::YUY2_to_RGB24(uint16 *pu8RGBData, uint16 *pu8YUVData)
 			Y1 = *pu8YUVData++;
 			V  = *pu8YUVData++;
 
-			R  = int32(1.164383 * (Y0 - 16) + 1.596027 * (V - 128));
-			G  = int32(1.164383 * (Y0 - 16) - 0.812968 * (V - 128) - 0.391762 * (U - 128));
-			B  = int32(1.164383 * (Y0 - 16) + 2.017232 * (U - 128));
+			R  = int32(1.164383 * (Y0>>2 - 16) + 1.596027 * (V>>2 - 128));
+			G  = int32(1.164383 * (Y0>>2 - 16) - 0.812968 * (V>>2 - 128) - 0.391762 * (U>>2 - 128));
+			B  = int32(1.164383 * (Y0>>2 - 16) + 2.017232 * (U>>2 - 128));
 			if ( R < 0 )
 				R = 0;
 			if ( R > 255)
@@ -322,6 +388,119 @@ void CChildDlg::YUY2_to_RGB24(uint16 *pu8RGBData, uint16 *pu8YUVData)
 			if ( B < 0 )
 				B = 0;
 			if ( B > 255 )
+				B = 255;
+			*pu8RGBData++ = (uint8)B;
+			*pu8RGBData++ = (uint8)G;
+			*pu8RGBData++ = (uint8)R;
+		}
+	}
+}
+
+
+
+void CChildDlg::YV12_to_RGB(uint8* pu8Y, uint8* pu8U, uint8* pu8V)
+{
+	int32	x;
+	int32	y;
+	int32	k;
+	int32	m = 0;
+	int32	n = 0;
+	int32	rgb[3];
+	int32	s32RGBBuffStride = ((s32Width * 3 + 3) >> 2) << 2;
+	CYUVPlayerDlg	*pMainDlg = (CYUVPlayerDlg *)this->pMainDlg;
+
+
+	k = s32Height * s32RGBBuffStride;
+
+	for (y = 0; y < s32Height; y++)
+	{
+		k -= s32RGBBuffStride;
+
+		for (x = 0; x < s32Width; x++)
+		{
+			int32	i;
+			int32	j;
+
+			i = m + x;
+			j = n + (x >> 1);
+			rgb[2] = int32(1.164383 * ((pu8Y[i]) - 16) + 1.596027 * ((pu8V[j]) - 128)); // r
+			rgb[1] = int32(1.164383 * ((pu8Y[i]) - 16) - 0.812968 * ((pu8V[j]) - 128) - 0.391762 * ((pu8U[j]) - 128)); // g
+			rgb[0] = int32(1.164383 * ((pu8Y[i]) - 16) + 2.017232 * ((pu8U[j]) - 128)); // b			
+			// 			rgb[2]	= int32(1.164 * (pu8Y[i] - 16) + 1.793 * (pu8V[j] - 128)); // r
+			// 			rgb[1]	= int32(1.164 * (pu8Y[i] - 16) - 0.534 * (pu8V[j] - 128) - 0.213 * (pu8U[j] - 128)); // g
+			// 			rgb[0]	= int32(1.164 * (pu8Y[i] - 16) + 2.115 * (pu8U[j] - 128)); // b			
+
+			i = k + x * 3;
+			for (j = 0; j < 3; j++)
+			{
+				if ((rgb[j] >= 0) && (rgb[j] <= 255))
+				{
+					pRGBBuff1[i + j] = rgb[j];
+				}
+				else
+				{
+					pRGBBuff1[i + j] = (rgb[j] < 0) ? 0 : 255;
+				}
+			}
+		}
+
+		m += s32Width;
+		if (y % 2)
+		{
+			n += (s32Width >> 1);
+		}
+	}
+}
+
+void CChildDlg::YUY2_to_RGB(uint8 *pu8RGBData, uint8 *pu8YUVData)
+{
+	int32  R, G, B;
+	int32  x, y;
+	int32  Y0, U, Y1, V;
+
+
+	for (y = 0; y < s32Height; y++)
+	{
+		for (x = 0; x < s32Width; x += 2)
+		{
+			Y0 = *pu8YUVData++;
+			U = *pu8YUVData++;
+			Y1 = *pu8YUVData++;
+			V = *pu8YUVData++;
+
+			R = int32(1.164383 * (Y0 - 16) + 1.596027 * (V - 128));
+			G = int32(1.164383 * (Y0 - 16) - 0.812968 * (V - 128) - 0.391762 * (U - 128));
+			B = int32(1.164383 * (Y0 - 16) + 2.017232 * (U - 128));
+			if (R < 0)
+				R = 0;
+			if (R > 255)
+				R = 255;
+			if (G < 0)
+				G = 0;
+			if (G > 255)
+				G = 255;
+			if (B < 0)
+				B = 0;
+			if (B > 255)
+				B = 255;
+			*pu8RGBData++ = (uint8)B;
+			*pu8RGBData++ = (uint8)G;
+			*pu8RGBData++ = (uint8)R;
+
+			R = int32(1.164383 * (Y1 - 16) + 1.596027 * (V - 128));
+			G = int32(1.164383 * (Y1 - 16) - 0.812968 * (V - 128) - 0.391762 * (U - 128));
+			B = int32(1.164383 * (Y1 - 16) + 2.017232 * (U - 128));
+			if (R < 0)
+				R = 0;
+			if (R > 255)
+				R = 255;
+			if (G < 0)
+				G = 0;
+			if (G > 255)
+				G = 255;
+			if (B < 0)
+				B = 0;
+			if (B > 255)
 				B = 255;
 			*pu8RGBData++ = (uint8)B;
 			*pu8RGBData++ = (uint8)G;

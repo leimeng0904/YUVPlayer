@@ -35,6 +35,7 @@ public:
     int32	s32CurrFrameNr;
     CString	frameSize;
     CString	sampleFormat;
+	CString	bitFormat;
     CString zoomSize;
     CFile64	*pFile;
 
@@ -94,6 +95,8 @@ protected:
 private:
 	void	rotate_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV);
 	void	mirror_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV);
+	void	rotate_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV);
+	void	mirror_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV);
     int32	initial();
     int32	read_one_frame(uint8 u8ImageMode);
 };
