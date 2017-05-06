@@ -3,7 +3,8 @@
 
 
 ///////////////////// classes ////////////////////////////////////////
-class CFile64 : public CFile {
+class CFile64 : public CFile
+{
 public:
     // Attributes
     ULONGLONG GetPosition();

@@ -11,36 +11,36 @@ extern "C"
 #endif
 
 
-class CCriticalSection
-{
-public:
-	CCriticalSection(LPCRITICAL_SECTION lpCriticalSection)
-	{
-		m_lpCriticalSection	 = lpCriticalSection;
-		EnterCriticalSection(m_lpCriticalSection);
-	}
+    class CCriticalSection
+    {
+    public:
+        CCriticalSection(LPCRITICAL_SECTION lpCriticalSection)
+        {
+            m_lpCriticalSection  = lpCriticalSection;
+            EnterCriticalSection(m_lpCriticalSection);
+        }
 
-	~CCriticalSection()
-	{
-		LeaveCriticalSection(m_lpCriticalSection);
-	}
+        ~CCriticalSection()
+        {
+            LeaveCriticalSection(m_lpCriticalSection);
+        }
 
-	static void initial(LPCRITICAL_SECTION lpCriticalSection)
-	{
-		InitializeCriticalSection(lpCriticalSection);
-	}
+        static void initial(LPCRITICAL_SECTION lpCriticalSection)
+        {
+            InitializeCriticalSection(lpCriticalSection);
+        }
 
-	static void delet(LPCRITICAL_SECTION lpCriticalSection)
-	{
-		DeleteCriticalSection(lpCriticalSection);
-	}
+        static void delet(LPCRITICAL_SECTION lpCriticalSection)
+        {
+            DeleteCriticalSection(lpCriticalSection);
+        }
 
-private:
-	LPCRITICAL_SECTION m_lpCriticalSection;
-};
+    private:
+        LPCRITICAL_SECTION m_lpCriticalSection;
+    };
 
 
-uint32 play_video(LPVOID pParam);
+    uint32 play_video(LPVOID pParam);
 
 
 #ifdef _cplusplus

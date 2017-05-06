@@ -15,10 +15,11 @@ ULONGLONG CFile64::Seek(LONGLONG lOff, UINT nFrom)
     LARGE_INTEGER liOff;
     liOff.QuadPart = lOff;
     liOff.LowPart = ::SetFilePointer((HANDLE)m_hFile, liOff.LowPart, &liOff.HighPart,
-        (DWORD)nFrom);
-    if (liOff.LowPart == (DWORD)-1)
-        if (::GetLastError() != NO_ERROR)
+                                     (DWORD)nFrom);
+    if (liOff.LowPart == (DWORD) - 1)
+        if (::GetLastError() != NO_ERROR) {
             CFileException::ThrowOsError((LONG)::GetLastError(), m_strFileName);
+        }
     return liOff.QuadPart;
 }
 
@@ -29,9 +30,10 @@ ULONGLONG CFile64::GetPosition()
     LARGE_INTEGER liPos;
     liPos.QuadPart = 0;
     liPos.LowPart = ::SetFilePointer((HANDLE)m_hFile, liPos.LowPart, &liPos.HighPart, FILE_CURRENT);
-    if (liPos.LowPart == (DWORD)-1)
-        if (::GetLastError() != NO_ERROR)
+    if (liPos.LowPart == (DWORD) - 1)
+        if (::GetLastError() != NO_ERROR) {
             CFileException::ThrowOsError((LONG)::GetLastError(), m_strFileName);
+        }
     return liPos.QuadPart;
 }
 
@@ -44,10 +46,11 @@ void CFile64::LockRange(ULONGLONG dwPos, ULONGLONG dwCount)
     liPos.QuadPart = dwPos;
     liCount.QuadPart = dwCount;
     if (!::LockFile((HANDLE)m_hFile, liPos.LowPart, liPos.HighPart, liCount.LowPart,
-        liCount.HighPart)) {
+                    liCount.HighPart)) {
         CFileException::ThrowOsError((LONG)::GetLastError(), m_strFileName);
     }
 }
+
 void CFile64::UnlockRange(ULONGLONG dwPos, ULONGLONG dwCount)
 {
     ASSERT_VALID(this);
@@ -57,25 +60,29 @@ void CFile64::UnlockRange(ULONGLONG dwPos, ULONGLONG dwCount)
     liPos.QuadPart = dwPos;
     liCount.QuadPart = dwCount;
     if (!::UnlockFile((HANDLE)m_hFile, liPos.LowPart, liPos.HighPart, liCount.LowPart,
-        liCount.HighPart)) {
+                      liCount.HighPart)) {
         CFileException::ThrowOsError((LONG)::GetLastError(), m_strFileName);
     }
 }
+
 void CFile64::SetLength(ULONGLONG dwNewLen)
 {
     ASSERT_VALID(this);
     ASSERT((HANDLE)m_hFile != INVALID_HANDLE_VALUE);
     Seek(dwNewLen, (UINT)begin);
-    if (!::SetEndOfFile((HANDLE)m_hFile))
+    if (!::SetEndOfFile((HANDLE)m_hFile)) {
         CFileException::ThrowOsError((LONG)::GetLastError(), m_strFileName);
+    }
 }
+
 ULONGLONG CFile64::GetLength()
 {
     ASSERT_VALID(this);
     ULARGE_INTEGER liSize;
     liSize.LowPart = ::GetFileSize((HANDLE)m_hFile, &liSize.HighPart);
-    if (liSize.LowPart == (DWORD)-1)
-        if (::GetLastError() != NO_ERROR)
+    if (liSize.LowPart == (DWORD) - 1)
+        if (::GetLastError() != NO_ERROR) {
             CFileException::ThrowOsError((LONG)::GetLastError(), m_strFileName);
+        }
     return liSize.QuadPart;
 }

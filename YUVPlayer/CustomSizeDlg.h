@@ -17,60 +17,60 @@ class CCustomSizeDlg : public CDialog
 {
 // Construction
 public:
-	CCustomSizeDlg(CWnd* pParent = NULL);   // standard constructor
-	CCustomSizeDlg(CWnd* pParent, CWnd* pMainDlg);
+    CCustomSizeDlg(CWnd *pParent = NULL);   // standard constructor
+    CCustomSizeDlg(CWnd *pParent, CWnd *pMainDlg);
 
-    CWnd	*pMainDlg;
-	
-	void	get_size_list();
-	void	create_window(CWnd *pParentWnd);
-	void	close_dlg();
+    CWnd    *pMainDlg;
+
+    void    get_size_list();
+    void    create_window(CWnd *pParentWnd);
+    void    close_dlg();
 // Dialog Data
-	//{{AFX_DATA(CCustomSizeDlg)
-	enum { IDD = IDD_CUSTOMSIZE_DIALOG };
-	CEdit	m_width;
-	CListCtrl	m_sizeList;
-	CString	m_sHeight;
-	CString	m_sWidth;
-	CString	m_sPriority;
-	//}}AFX_DATA
+    //{{AFX_DATA(CCustomSizeDlg)
+    enum { IDD = IDD_CUSTOMSIZE_DIALOG };
+    CEdit   m_width;
+    CListCtrl   m_sizeList;
+    CString m_sHeight;
+    CString m_sWidth;
+    CString m_sPriority;
+    //}}AFX_DATA
 
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCustomSizeDlg)
-	public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CCustomSizeDlg)
+public:
+    virtual BOOL PreTranslateMessage(MSG *pMsg);
+protected:
+    virtual void DoDataExchange(CDataExchange *pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
 
 // Implementation
 protected:
 
-	// Generated message map functions
-	//{{AFX_MSG(CCustomSizeDlg)
-	virtual void OnOK();
-	afx_msg void OnDeleteItems();
-	virtual void OnCancel();
-	afx_msg void OnNoSelect();
-	afx_msg void OnClose();
-	afx_msg void OnClickSizeList(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnClearSize();
-	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+    // Generated message map functions
+    //{{AFX_MSG(CCustomSizeDlg)
+    virtual void OnOK();
+    afx_msg void OnDeleteItems();
+    virtual void OnCancel();
+    afx_msg void OnNoSelect();
+    afx_msg void OnClose();
+    afx_msg void OnClickSizeList(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnClearSize();
+    virtual BOOL OnInitDialog();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 
 private:
-	CString		frameSize;
+    CString     frameSize;
 
-	void	initial();
-	void	add_item();
-	void	reset_input();
-	void	set_frame_size(int8 s8Offset);
-    void	update_framesize_list();
-	int32	check_size();
-	int32	get_frame_size();
+    void    initial();
+    void    add_item();
+    void    reset_input();
+    void    set_frame_size(int8 s8Offset);
+    void    update_framesize_list();
+    int32   check_size();
+    int32   get_frame_size();
 };
 
 //{{AFX_INSERT_LOCATION}}
