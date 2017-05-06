@@ -93,10 +93,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
         
 private:
-	void	rotate_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV);
-	void	mirror_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV);
-	void	rotate_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV);
-	void	mirror_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV);
+	void	rotate_image(Pel* pSrcY, Pel* pSrcU, Pel* pSrcV);
+	void	mirror_image(Pel* pSrcY, Pel* pSrcU, Pel* pSrcV);
     int32	initial();
     int32	read_one_frame(uint8 u8ImageMode);
 };

@@ -166,6 +166,7 @@ public:
 	afx_msg void OnCbnSelchangeFrameSize();
 	afx_msg void OnCbnSelchangeBit();
 	afx_msg void OnCbnSelchangeSampleFormat();
+	afx_msg void OnCbnSelchangeZoom();
 };
 
 //{{AFX_INSERT_LOCATION}}

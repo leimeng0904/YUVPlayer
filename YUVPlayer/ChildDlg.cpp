@@ -42,22 +42,6 @@ CChildDlg::CChildDlg(UINT nID, CWnd* pParent /*=NULL*/)
 	pDisplayLuma		= NULL;
 	pDisplayChro		= NULL;
 	pRGBBuff			= NULL;
-	pReadYUV1[0]         = NULL;
-	pReadYUV1[1]         = NULL;
-	pReadYUV1[2]         = NULL;
-	pOrigYUV1[0]         = NULL;
-	pOrigYUV1[1]         = NULL;
-	pOrigYUV1[2]         = NULL;
-	pMirrYUV1[0]         = NULL;
-	pMirrYUV1[1]         = NULL;
-	pMirrYUV1[2]         = NULL;
-	pRotaYUV1[0]         = NULL;
-	pRotaYUV1[1]         = NULL;
-	pRotaYUV1[2]         = NULL;
-	pDisplayLuma1        = NULL;
-	pDisplayChro1        = NULL;
-	pRGBBuff1 = NULL;
-	
     mouseMenu.LoadMenu(IDR_MOUSE_MENU);//装载自定义的右键菜单
     pSubMenu   = mouseMenu.GetSubMenu(0);//获取第一个弹出菜单，所以第一个菜单必须有子菜单
 }
@@ -78,10 +62,7 @@ int32 CChildDlg::malloc_memory()
 	u32MemorySize += u32ChroPicSize;	//++ 用于显示的 YUV 图像色度分量
 	//u32MemorySize += (((s32Width * 3 + 3) >> 2) << 2) * s32Height;	//++ RGB 内存空间
 
-	
-	if (u8BitFormat == 10)
-	{
-		pYUVBuff = (LPWORD)malloc(u32MemorySize);
+		pYUVBuff = (Pel*)malloc(u32MemorySize);
 		pRGBBuff = (LPBYTE)malloc((((s32Width * 3 + 3) >> 2) << 2) * s32Height);
 		if (NULL == pYUVBuff)
 		{
@@ -100,34 +81,7 @@ int32 CChildDlg::malloc_memory()
 		pRotaYUV[2] = pRotaYUV[1] + u32ChroBuffSize;
 		pDisplayLuma = pRotaYUV[2] + u32ChroBuffSize;
 		pDisplayChro = pDisplayLuma + u32LumaPicSize;
-		//pRGBBuff =LPBYTE(pDisplayChro+ u32ChroPicSize);
 		memset(pYUVBuff, 128, u32MemorySize);
-	}
-	else
-	{
-		u32MemorySize += (((s32Width * 3 + 3) >> 2) << 2) * s32Height;
-		pYUVBuff1 = (LPBYTE)malloc(u32MemorySize);
-		if (NULL == pYUVBuff1)
-		{
-			AfxMessageBox("分配内存错误！\n", MB_ICONERROR);
-
-			return FAILED_YUVPlayer;
-		}
-		pReadYUV1[0] = pYUVBuff1;
-		pReadYUV1[1] = pReadYUV1[0] + u32LumaBuffSize;
-		pReadYUV1[2] = pReadYUV1[1] + u32ChroBuffSize;
-		pMirrYUV1[0] = pReadYUV1[2] + u32ChroBuffSize;
-		pMirrYUV1[1] = pMirrYUV1[0] + u32LumaBuffSize;
-		pMirrYUV1[2] = pMirrYUV1[1] + u32ChroBuffSize;
-		pRotaYUV1[0] = pMirrYUV1[2] + u32ChroBuffSize;
-		pRotaYUV1[1] = pRotaYUV1[0] + u32LumaBuffSize;
-		pRotaYUV1[2] = pRotaYUV1[1] + u32ChroBuffSize;
-		pDisplayLuma1 = pRotaYUV1[2] + u32ChroBuffSize;
-		pDisplayChro1 = pDisplayLuma1 + u32LumaPicSize;
-		pRGBBuff1 = pDisplayChro1 + u32ChroPicSize;
-		memset(pYUVBuff1, 128, u32MemorySize);
-	}
-    
     hloc = GlobalAlloc(GMEM_ZEROINIT | GMEM_MOVEABLE, sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256));
     if (NULL == hloc)
     {
@@ -182,15 +136,10 @@ void CChildDlg::resize_window()
 
 int32 CChildDlg::show_image(CDC *pDC)
 {
-    int32   s32Ret;
-    
-    
+    int32   s32Ret;   
     BmpInfo->bmiHeader.biBitCount    = 24;
     pDC->SetStretchBltMode(COLORONCOLOR);
-	if (u8BitFormat==10)
         s32Ret	 = StretchDIBits(pDC->m_hDC, 0, 0, s32ZoomWidth, s32ZoomHeight, 0, 0, s32Width, s32Height, pRGBBuff, BmpInfo, DIB_RGB_COLORS, SRCCOPY);
-	else
-		s32Ret = StretchDIBits(pDC->m_hDC, 0, 0, s32ZoomWidth, s32ZoomHeight, 0, 0, s32Width, s32Height, pRGBBuff1, BmpInfo, DIB_RGB_COLORS, SRCCOPY);
     if (s32Ret == GDI_ERROR)
     {
         return FAILED_YUVPlayer;
@@ -225,19 +174,14 @@ void CChildDlg::color_space_convert(uint8 u8ImageMode)
 	{
 	case IMAGE_YUV:
 	{
-	   if (u8BitFormat == 10)
-	     YV12_to_RGB24(pOrigYUV[0], pOrigYUV[1], pOrigYUV[2]);
-	   else
-	     YV12_to_RGB(pOrigYUV1[0], pOrigYUV1[1], pOrigYUV1[2]);
+
+	   YV12_to_RGB24(pOrigYUV[0], pOrigYUV[1], pOrigYUV[2]);
 	   break;
 	}
 
 	case IMAGE_Y:
 	{
-		if (u8BitFormat == 10)
-			YV12_to_RGB24(pOrigYUV[0], pDisplayChro, pDisplayChro);
-		else
-			YV12_to_RGB(pOrigYUV1[0], pDisplayChro1, pDisplayChro1);
+		YV12_to_RGB24(pOrigYUV[0], pDisplayChro, pDisplayChro);
 		break;
 	}
 
@@ -246,17 +190,9 @@ void CChildDlg::color_space_convert(uint8 u8ImageMode)
 		for (j = 0; j < s32Height; j++)
 		{
 			for (i = 0; i < s32Width; i++)
-			{
-				if (u8BitFormat == 10)
 					pDisplayLuma[j * s32Width + i] = pOrigYUV[1][(j >> 1) * s32ChroWidth + (i >> 1)];
-				else
-					pDisplayLuma1[j * s32Width + i] = pOrigYUV1[1][(j >> 1) * s32ChroWidth + (i >> 1)];
-			}
 		}
-		if (u8BitFormat == 10)
 			YV12_to_RGB24(pDisplayLuma, pDisplayChro, pDisplayChro);
-		else
-			YV12_to_RGB(pDisplayLuma1, pDisplayChro1, pDisplayChro1);
 		break;
 	}
 
@@ -265,17 +201,9 @@ void CChildDlg::color_space_convert(uint8 u8ImageMode)
 		for (j = 0; j < s32Height; j++)
 		{
 			for (i = 0; i < s32Width; i++)
-			{
-				if (u8BitFormat == 10)
 					pDisplayLuma[j * s32Width + i] = pOrigYUV[2][(j >> 1) * s32ChroWidth + (i >> 1)];
-				else
-					pDisplayLuma1[j * s32Width + i] = pOrigYUV1[2][(j >> 1) * s32ChroWidth + (i >> 1)];
-			}
 		}
-		if (u8BitFormat == 10)
 			YV12_to_RGB24(pDisplayLuma, pDisplayChro, pDisplayChro);
-		else
-		    YV12_to_RGB(pDisplayLuma1, pDisplayChro1, pDisplayChro1);
 		break;
 	}
 
@@ -285,7 +213,7 @@ void CChildDlg::color_space_convert(uint8 u8ImageMode)
 	}
 }
 
-void CChildDlg::YV12_to_RGB24(uint16* pu8Y, uint16* pu8U, uint16* pu8V)
+void CChildDlg::YV12_to_RGB24(Pel* pu8Y, Pel* pu8U, Pel* pu8V)
 {
 	int32	x;
 	int32	y;
@@ -310,12 +238,18 @@ void CChildDlg::YV12_to_RGB24(uint16* pu8Y, uint16* pu8U, uint16* pu8V)
 
 			i	= m + x;
 			j	= n + (x >> 1);
-			rgb[2] = int32(1.164383 * ((pu8Y[i] >> 2) - 16) + 1.596027 * ((pu8V[j] >> 2) - 128)); // r
-			rgb[1] = int32(1.164383 * ((pu8Y[i] >> 2) - 16) - 0.812968 * ((pu8V[j] >> 2) - 128) - 0.391762 * ((pu8U[j] >> 2) - 128)); // g
-			rgb[0] = int32(1.164383 * ((pu8Y[i] >> 2) - 16) + 2.017232 * ((pu8U[j] >> 2) - 128)); // b			
-// 			rgb[2]	= int32(1.164 * (pu8Y[i] - 16) + 1.793 * (pu8V[j] - 128)); // r
-// 			rgb[1]	= int32(1.164 * (pu8Y[i] - 16) - 0.534 * (pu8V[j] - 128) - 0.213 * (pu8U[j] - 128)); // g
-// 			rgb[0]	= int32(1.164 * (pu8Y[i] - 16) + 2.115 * (pu8U[j] - 128)); // b			
+			if (u8BitFormat == 10)
+			{
+				rgb[2] = int32(1.164383 * ((pu8Y[i] >> 2) - 16) + 1.596027 * ((pu8V[j] >> 2) - 128)); // r
+				rgb[1] = int32(1.164383 * ((pu8Y[i] >> 2) - 16) - 0.812968 * ((pu8V[j] >> 2) - 128) - 0.391762 * ((pu8U[j] >> 2) - 128)); // g
+				rgb[0] = int32(1.164383 * ((pu8Y[i] >> 2) - 16) + 2.017232 * ((pu8U[j] >> 2) - 128)); // b	
+			}
+			else
+			{
+				rgb[2] = int32(1.164383 * ((pu8Y[i]) - 16) + 1.596027 * ((pu8V[j]) - 128)); // r
+				rgb[1] = int32(1.164383 * ((pu8Y[i]) - 16) - 0.812968 * ((pu8V[j]) - 128) - 0.391762 * ((pu8U[j]) - 128)); // g
+				rgb[0] = int32(1.164383 * ((pu8Y[i]) - 16) + 2.017232 * ((pu8U[j]) - 128)); // b		
+			}
 
 			i	= k + x * 3;
 			for(j = 0; j < 3; j ++)
@@ -388,119 +322,6 @@ void CChildDlg::YUY2_to_RGB24(uint16 *pu8RGBData, uint16 *pu8YUVData)
 			if ( B < 0 )
 				B = 0;
 			if ( B > 255 )
-				B = 255;
-			*pu8RGBData++ = (uint8)B;
-			*pu8RGBData++ = (uint8)G;
-			*pu8RGBData++ = (uint8)R;
-		}
-	}
-}
-
-
-
-void CChildDlg::YV12_to_RGB(uint8* pu8Y, uint8* pu8U, uint8* pu8V)
-{
-	int32	x;
-	int32	y;
-	int32	k;
-	int32	m = 0;
-	int32	n = 0;
-	int32	rgb[3];
-	int32	s32RGBBuffStride = ((s32Width * 3 + 3) >> 2) << 2;
-	CYUVPlayerDlg	*pMainDlg = (CYUVPlayerDlg *)this->pMainDlg;
-
-
-	k = s32Height * s32RGBBuffStride;
-
-	for (y = 0; y < s32Height; y++)
-	{
-		k -= s32RGBBuffStride;
-
-		for (x = 0; x < s32Width; x++)
-		{
-			int32	i;
-			int32	j;
-
-			i = m + x;
-			j = n + (x >> 1);
-			rgb[2] = int32(1.164383 * ((pu8Y[i]) - 16) + 1.596027 * ((pu8V[j]) - 128)); // r
-			rgb[1] = int32(1.164383 * ((pu8Y[i]) - 16) - 0.812968 * ((pu8V[j]) - 128) - 0.391762 * ((pu8U[j]) - 128)); // g
-			rgb[0] = int32(1.164383 * ((pu8Y[i]) - 16) + 2.017232 * ((pu8U[j]) - 128)); // b			
-			// 			rgb[2]	= int32(1.164 * (pu8Y[i] - 16) + 1.793 * (pu8V[j] - 128)); // r
-			// 			rgb[1]	= int32(1.164 * (pu8Y[i] - 16) - 0.534 * (pu8V[j] - 128) - 0.213 * (pu8U[j] - 128)); // g
-			// 			rgb[0]	= int32(1.164 * (pu8Y[i] - 16) + 2.115 * (pu8U[j] - 128)); // b			
-
-			i = k + x * 3;
-			for (j = 0; j < 3; j++)
-			{
-				if ((rgb[j] >= 0) && (rgb[j] <= 255))
-				{
-					pRGBBuff1[i + j] = rgb[j];
-				}
-				else
-				{
-					pRGBBuff1[i + j] = (rgb[j] < 0) ? 0 : 255;
-				}
-			}
-		}
-
-		m += s32Width;
-		if (y % 2)
-		{
-			n += (s32Width >> 1);
-		}
-	}
-}
-
-void CChildDlg::YUY2_to_RGB(uint8 *pu8RGBData, uint8 *pu8YUVData)
-{
-	int32  R, G, B;
-	int32  x, y;
-	int32  Y0, U, Y1, V;
-
-
-	for (y = 0; y < s32Height; y++)
-	{
-		for (x = 0; x < s32Width; x += 2)
-		{
-			Y0 = *pu8YUVData++;
-			U = *pu8YUVData++;
-			Y1 = *pu8YUVData++;
-			V = *pu8YUVData++;
-
-			R = int32(1.164383 * (Y0 - 16) + 1.596027 * (V - 128));
-			G = int32(1.164383 * (Y0 - 16) - 0.812968 * (V - 128) - 0.391762 * (U - 128));
-			B = int32(1.164383 * (Y0 - 16) + 2.017232 * (U - 128));
-			if (R < 0)
-				R = 0;
-			if (R > 255)
-				R = 255;
-			if (G < 0)
-				G = 0;
-			if (G > 255)
-				G = 255;
-			if (B < 0)
-				B = 0;
-			if (B > 255)
-				B = 255;
-			*pu8RGBData++ = (uint8)B;
-			*pu8RGBData++ = (uint8)G;
-			*pu8RGBData++ = (uint8)R;
-
-			R = int32(1.164383 * (Y1 - 16) + 1.596027 * (V - 128));
-			G = int32(1.164383 * (Y1 - 16) - 0.812968 * (V - 128) - 0.391762 * (U - 128));
-			B = int32(1.164383 * (Y1 - 16) + 2.017232 * (U - 128));
-			if (R < 0)
-				R = 0;
-			if (R > 255)
-				R = 255;
-			if (G < 0)
-				G = 0;
-			if (G > 255)
-				G = 255;
-			if (B < 0)
-				B = 0;
-			if (B > 255)
 				B = 255;
 			*pu8RGBData++ = (uint8)B;
 			*pu8RGBData++ = (uint8)G;
@@ -797,26 +618,14 @@ void CChildDlg::get_pixel_value()
     int32	j;
     int32	s32LumaWidth	 = s32Width;
     int32	s32ChroWidth	 = s32Width >> 1;
-	uint16	*pLuma;
-	uint16	*pCb;
-	uint16	*pCr;
-	uint8	*pLuma1;
-	uint8	*pCb1;
-	uint8	*pCr1;
-	if (u8BitFormat == 10)
-	{
+	Pel	*pLuma;
+	Pel	*pCb;
+	Pel	*pCr;
 			pLuma = pOrigYUV[0] + (s32ViewMBy * s32LumaWidth + s32ViewMBx);
 			pCb = pOrigYUV[1] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
 			pCr = pOrigYUV[2] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
-	}
-	else
-	{
-		pLuma1 = pOrigYUV1[0] + (s32ViewMBy * s32LumaWidth + s32ViewMBx);
-		pCb1 = pOrigYUV1[1] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
-		pCr1 = pOrigYUV1[2] + ((s32ViewMBy * s32ChroWidth + s32ViewMBx) >> 1);
-	}
-    
-    
+	
+   
     //++ 启用临界区保护
     CCriticalSection	CriticalSection(pCriticalSection);
     u8LumaPointNumX		 = min(s32Width - s32ViewMBx, 16);
@@ -831,12 +640,8 @@ void CChildDlg::get_pixel_value()
     for (j = 1; j < 1 + u8LumaPointNumY; j ++)
     {
         for (i = 1; i < 1 + u8LumaPointNumX; i ++)
-        {
-			if (u8BitFormat == 10)
-			  MBInfoDlg.pixelValue[j][i]= pLuma[(j - 1) * s32LumaWidth + (i - 1)];
-			else
-			  MBInfoDlg.pixelValue[j][i] = pLuma1[(j - 1) * s32LumaWidth + (i - 1)];
-        }
+	    	  MBInfoDlg.pixelValue[j][i]= pLuma[(j - 1) * s32LumaWidth + (i - 1)];
+  
     }
     for (j = 18; j < 18 + u8ChroPointNumY; j ++)
     {
@@ -844,16 +649,12 @@ void CChildDlg::get_pixel_value()
         {
 			if (u8BitFormat == 10)
 			   MBInfoDlg.pixelValue[j][i]	 = pCb[(j - 18) * s32ChroWidth + (i - 1)];
-			else
-			   MBInfoDlg.pixelValue[j][i] = pCb1[(j - 18) * s32ChroWidth + (i - 1)];
         }
         
         for (i = 9; i < 9 + u8ChroPointNumX; i ++)
         {
 			if (u8BitFormat == 10)
 			  MBInfoDlg.pixelValue[j][i]	 = pCr[(j - 18) * s32ChroWidth + (i - 9)];
-			else
-			  MBInfoDlg.pixelValue[j][i] = pCr1[(j - 18) * s32ChroWidth + (i - 1)];
         }
     }
 }

@@ -136,6 +136,7 @@ BEGIN_MESSAGE_MAP(CYUVPlayerDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_FRAME_SIZE, &CYUVPlayerDlg::OnCbnSelchangeFrameSize)
 	ON_CBN_SELCHANGE(IDC_Bit, &CYUVPlayerDlg::OnCbnSelchangeBit)
 	ON_CBN_SELCHANGE(IDC_SAMPLE_FORMAT, &CYUVPlayerDlg::OnCbnSelchangeSampleFormat)
+	ON_CBN_SELCHANGE(IDC_ZOOM, &CYUVPlayerDlg::OnCbnSelchangeZoom)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1979,6 +1980,12 @@ void CYUVPlayerDlg::OnCbnSelchangeBit()
 	// TODO:  在此添加控件通知处理程序代码
 }
 void CYUVPlayerDlg::OnCbnSelchangeFrameSize()
+{
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CYUVPlayerDlg::OnCbnSelchangeZoom()
 {
 	// TODO:  在此添加控件通知处理程序代码
 }

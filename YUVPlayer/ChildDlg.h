@@ -5,7 +5,7 @@
 #include "define.h"
 #include "MBInfoDlg.h"
 
-
+typedef WORD  Pel;
 class CChildDlg : public CDialog
 {
 public:
@@ -47,22 +47,14 @@ public:
     CMBInfoDlg		MBInfoDlg;
     PCRITICAL_SECTION pCriticalSection;
 	/********************************************改******************************************/
-    LPBYTE	pYUVBuff1;
-    LPBYTE	pRGBBuff1;
-    LPBYTE	pReadYUV1[3];
-    LPBYTE	pOrigYUV1[3];
-    LPBYTE	pMirrYUV1[3];
-    LPBYTE	pRotaYUV1[3];
-    LPBYTE	pDisplayLuma1;
-    LPBYTE	pDisplayChro1;
-	LPWORD	pYUVBuff;
-	LPBYTE pRGBBuff;
-	LPWORD pReadYUV[3];
-	LPWORD pOrigYUV[3];
-	LPWORD pMirrYUV[3];
-	LPWORD pRotaYUV[3];
-	LPWORD pDisplayLuma;
-	LPWORD pDisplayChro;
+	LPBYTE   pRGBBuff;     //转换后的RGB值
+	Pel*	pYUVBuff;
+	Pel*    pReadYUV[3];
+	Pel*    pOrigYUV[3];
+	Pel*    pMirrYUV[3];
+	Pel*    pRotaYUV[3];
+	Pel*    pDisplayLuma;
+	Pel*    pDisplayChro;
     CString	fileName;
     CMenu	mouseMenu;
     CWnd	*pMainDlg;
@@ -82,10 +74,8 @@ public:
     void	show_macroblock_info();
     void	view_macroblock();
     void	color_space_convert(uint8 u8ImageMode);
-	void	YV12_to_RGB24(uint16* pu8Y, uint16* pu8U, uint16* pu8V);
+	void	YV12_to_RGB24(Pel* pu8Y, Pel* pu8U, Pel* pu8V);
 	void	YUY2_to_RGB24(uint16 *pu8RGBData, uint16 *pu8YUVData);
-	void	YV12_to_RGB(uint8* pu8Y, uint8* pu8U, uint8* pu8V);
-	void	YUY2_to_RGB(uint8 *pu8RGBData, uint8 *pu8YUVData);
     void	set_image_mode(uint8 u8ImageMode);
     void	draw_dash_frame(CRect &rect);
 	void	change_size(LPRECT pRect);

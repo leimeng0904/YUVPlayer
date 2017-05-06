@@ -95,19 +95,9 @@ int32 CDiffPicDlg::initial()
 	{
 		return FAILED_YUVPlayer;
 	}
-	if (u8BitFormat == 10)
-	{
 		pOrigYUV[0] = pReadYUV[0];
 		pOrigYUV[1] = pReadYUV[1];
 		pOrigYUV[2] = pReadYUV[2];
-	}
-	else
-	{
-		pOrigYUV1[0] = pReadYUV1[0];
-		pOrigYUV1[1] = pReadYUV1[1];
-		pOrigYUV1[2] = pReadYUV1[2];
-	}
-
 	set_bmp_parameter();
 
 	//++ ´´½¨×ÖÌå
@@ -142,10 +132,7 @@ int32 CDiffPicDlg::create_window(CWnd *pMainDlg)
 
 void CDiffPicDlg::kill_window()
 {
-	if (u8BitFormat==10)
 	    free(pYUVBuff); 
-	else
-		free(pYUVBuff1);
 	GlobalFree(hloc);
 	
 	MBInfoDlg.talbeFont.DeleteObject();
@@ -278,25 +265,16 @@ void CDiffPicDlg::get_one_frame(uint8 u8ImageMode)
 	int32	i;
 	int32	j;
 	uint32	u32Offset;
-	uint16	**pYUV1;
-	uint16	**pYUV2;
-	uint8	**pYUV3;
-	uint8	**pYUV4;
+	Pel*    *pYUV1;
+	Pel*	*pYUV2;
 	CYUVPlayerDlg	*pMainDlg	 = (CYUVPlayerDlg *)this->pMainDlg;
 
 
 	bSameFlag	= TRUE;
 	u32Offset	= 0;
-	if (u8BitFormat == 10)
-	{
 		pYUV1 = pMainDlg->pImage[0]->pReadYUV;
 		pYUV2 = pMainDlg->pImage[1]->pReadYUV;
-	}
-	else
-	{
-		pYUV3 = pMainDlg->pImage[0]->pReadYUV1;
-		pYUV4 = pMainDlg->pImage[1]->pReadYUV1;
-	}
+	
 
 	switch (u8SampleFormat)
 	{
@@ -304,81 +282,41 @@ void CDiffPicDlg::get_one_frame(uint8 u8ImageMode)
 		u32Offset	 = 0;
 		for (j = 0; j < (s32Height >> 1); j++)
 		{
-			if (u8BitFormat == 10)
 				for (i = 0; i< (s32Width >> 1); i++)
 				{
-					int32	s32Diff = pYUV2[1][u32Offset] - pYUV1[1][u32Offset];
+					Pel	s32Diff = pYUV2[1][u32Offset] - pYUV1[1][u32Offset];
 					pOrigYUV[1][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
 					bSameFlag &= (!s32Diff);
 					u32Offset++;
 				}
-			else
-			    for (i = 0; i< (s32Width >> 1); i++)
-			    {
-			    	int32	s32Diff = pYUV4[1][u32Offset] - pYUV3[1][u32Offset];
-			    	pOrigYUV1[1][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
-			    	bSameFlag &= (!s32Diff);
-			    	u32Offset++;
-			    }
 		}
 		
 		u32Offset	 = 0;
 		for (j = 0; j < (s32Height >> 1); j++)
 		{
-			if (u8BitFormat == 10)
-			{
 				for (i = 0; i< (s32Width >> 1); i++)
 				{
-					int32	s32Diff = pYUV2[2][u32Offset] - pYUV1[2][u32Offset];
+					Pel	s32Diff = pYUV2[2][u32Offset] - pYUV1[2][u32Offset];
 
 					pOrigYUV[2][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
 					bSameFlag &= (!s32Diff);
 					u32Offset++;
 				}
-			}
-			else
-			{
-				for (i = 0; i< (s32Width >> 1); i++)
-				{
-					int32	s32Diff = pYUV4[2][u32Offset] - pYUV3[2][u32Offset];
-
-					pOrigYUV1[2][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
-					bSameFlag &= (!s32Diff);
-					u32Offset++;
-				}
-			}
 		}
 	case YUV400:
 		u32Offset	 = 0;
-		if (u8BitFormat == 10)
-		{
+		
 			for (j = 0; j < s32Height; j++)
 			{
 				for (i = 0; i< s32Width; i++)
 				{
-					int32	s32Diff = pYUV2[0][u32Offset] - pYUV1[0][u32Offset];
+					Pel	s32Diff = pYUV2[0][u32Offset] - pYUV1[0][u32Offset];
 
 					pOrigYUV[0][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
 					bSameFlag &= (!s32Diff);
 					u32Offset++;
 				}
-			}
-		}
-		else
-		{
-			for (j = 0; j < s32Height; j++)
-			{
-				for (i = 0; i< s32Width; i++)
-				{
-					int32	s32Diff = pYUV4[0][u32Offset] - pYUV3[0][u32Offset];
-
-					pOrigYUV1[0][u32Offset] = u8DiffMode ? ABS(s32Diff) : BIN(s32Diff);
-					bSameFlag &= (!s32Diff);
-					u32Offset++;
-				}
-			}
-		}
-		
+			}		
 		break;
 
 	default:

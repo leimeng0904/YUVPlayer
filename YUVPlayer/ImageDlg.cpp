@@ -167,11 +167,8 @@ int32 CImageDlg::initial()
 	if (s32Ret == EOF_YUVPlayer)
 	{
 		bEOFFlag		= TRUE;
-		bBackwardOK		= FALSE;
-		if (u8BitFormat==10)
+		bBackwardOK		= FALSE;	
 		    free(pYUVBuff);
-		else
-			free(pYUVBuff1);
 		GlobalFree(hloc);
 
 		AfxMessageBox(fileName + " 读入数据错误！", MB_ICONERROR);
@@ -208,15 +205,15 @@ void CImageDlg::OnPaint()
 	// Do not call CFrameWnd::OnPaint() for painting messages
 }
 
-void CImageDlg::rotate_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV)
+void CImageDlg::rotate_image(Pel* pSrcY, Pel* pSrcU, Pel* pSrcV)
 {
 	int32	i, j;
-	uint16*	pu8SrcY;
-	uint16*	pu8SrcU;
-	uint16*	pu8SrcV;
-	uint16*	pu8DstY;
-	uint16*	pu8DstU;
-	uint16*	pu8DstV;
+	Pel*	pu8SrcY;
+	Pel*	pu8SrcU;
+	Pel*	pu8SrcV;
+	Pel*	pu8DstY;
+	Pel*	pu8DstU;
+	Pel*	pu8DstV;
 
 
 	if (s16RotateAngle == 0)
@@ -361,12 +358,12 @@ void CImageDlg::rotate_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV)
 void CImageDlg::mirror_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV)
 {
 	int32	i, j;
-	uint16*	pu8SrcY;
-	uint16*	pu8SrcU;
-	uint16*	pu8SrcV;
-	uint16*	pu8DstY;
-	uint16*	pu8DstU;
-	uint16*	pu8DstV;
+	Pel*	pu8SrcY;
+	Pel*	pu8SrcU;
+	Pel*	pu8SrcV;
+	Pel*	pu8DstY;
+	Pel*	pu8DstU;
+	Pel*	pu8DstV;
 
 
 	if (u8MirrorMode == MIRROR_NONE)
@@ -489,289 +486,17 @@ void CImageDlg::mirror_image(LPWORD pSrcY, LPWORD pSrcU, LPWORD pSrcV)
 	pOrigYUV[2]	= pMirrYUV[2];
 }
 
-void CImageDlg::rotate_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV)
-{
-	int32	i, j;
-	uint8*	pu8SrcY;
-	uint8*	pu8SrcU;
-	uint8*	pu8SrcV;
-	uint8*	pu8DstY;
-	uint8*	pu8DstU;
-	uint8*	pu8DstV;
-
-
-	if (s16RotateAngle == 0)
-	{
-		pOrigYUV1[0] = pSrcY;
-		pOrigYUV1[1] = pSrcU;
-		pOrigYUV1[2] = pSrcV;
-
-		return;
-	}
-
-	if (s16RotateAngle == 90)
-	{
-		switch (u8SampleFormat)
-		{
-		case YUV420:
-			pu8SrcU = pSrcU + (s32SrcWidth >> 1);
-			pu8SrcV = pSrcV + (s32SrcWidth >> 1);
-			for (j = 0; j < (s32SrcHeight >> 1); j++)
-			{
-				pu8DstU = pRotaYUV1[1] + u32ChroPicSize - j;
-				pu8DstV = pRotaYUV1[2] + u32ChroPicSize - j;
-				for (i = 0; i < (s32SrcWidth >> 1); i++)
-				{
-					pu8DstU[0] = pu8SrcU[-i];
-					pu8DstV[0] = pu8SrcV[-i];
-					pu8DstU -= (s32SrcHeight >> 1);
-					pu8DstV -= (s32SrcHeight >> 1);
-				}
-
-				pu8SrcU += (s32SrcWidth >> 1);
-				pu8SrcV += (s32SrcWidth >> 1);
-			}
-		case YUV400:
-			pu8SrcY = pSrcY + s32SrcWidth - 1;
-			for (j = 0; j < s32SrcHeight; j++)
-			{
-				pu8DstY = pRotaYUV1[0] + u32LumaPicSize - j - 1;
-
-				for (i = 0; i < s32SrcWidth; i++)
-				{
-					pu8DstY[0] = pu8SrcY[-i];
-					pu8DstY -= s32SrcHeight;
-				}
-
-				pu8SrcY += s32SrcWidth;
-			}
-
-			break;
-		default:
-			break;
-		}
-	}
-	else if (s16RotateAngle == 180)
-	{
-		switch (u8SampleFormat)
-		{
-		case YUV420:
-			pu8SrcU = pSrcU;
-			pu8SrcV = pSrcV;
-			pu8DstU = pRotaYUV1[1] + u32ChroPicSize - 1;
-			pu8DstV = pRotaYUV1[2] + u32ChroPicSize - 1;
-			for (j = 0; j < (s32SrcHeight >> 1); j++)
-			{
-				for (i = 0; i < (s32SrcWidth >> 1); i++)
-				{
-					pu8DstU[-i] = pu8SrcU[i];
-					pu8DstV[-i] = pu8SrcV[i];
-				}
-
-				pu8SrcU += (s32SrcWidth >> 1);
-				pu8SrcV += (s32SrcWidth >> 1);
-				pu8DstU -= (s32SrcWidth >> 1);
-				pu8DstV -= (s32SrcWidth >> 1);
-			}
-		case YUV400:
-			pu8SrcY = pSrcY;
-			pu8DstY = pRotaYUV1[0] + u32LumaPicSize - 1;
-			for (j = 0; j < s32SrcHeight; j++)
-			{
-				for (i = 0; i < s32SrcWidth; i++)
-				{
-					pu8DstY[-i] = pu8SrcY[i];
-				}
-
-				pu8SrcY += s32SrcWidth;
-				pu8DstY -= s32SrcWidth;
-			}
-			break;
-		default:
-			break;
-		}
-	}
-	else if (s16RotateAngle == 270)
-	{
-		switch (u8SampleFormat)
-		{
-		case YUV420:
-			pu8SrcU = pSrcU;
-			pu8SrcV = pSrcV;
-			for (j = 0; j < (s32SrcHeight >> 1); j++)
-			{
-				pu8DstU = pRotaYUV1[1] + u32ChroPicSize - (s32SrcHeight >> 1) + j;
-				pu8DstV = pRotaYUV1[2] + u32ChroPicSize - (s32SrcHeight >> 1) + j;
-				for (i = 0; i < (s32SrcWidth >> 1); i++)
-				{
-					pu8DstU[0] = pu8SrcU[i];
-					pu8DstV[0] = pu8SrcV[i];
-					pu8DstU -= (s32SrcHeight >> 1);
-					pu8DstV -= (s32SrcHeight >> 1);
-				}
-
-				pu8SrcU += (s32SrcWidth >> 1);
-				pu8SrcV += (s32SrcWidth >> 1);
-			}
-		case YUV400:
-			pu8SrcY = pSrcY;
-			for (j = 0; j < s32SrcHeight; j++)
-			{
-				pu8DstY = pRotaYUV1[0] + u32LumaPicSize - s32SrcHeight + j;
-
-				for (i = 0; i < s32SrcWidth; i++)
-				{
-					pu8DstY[0] = pu8SrcY[i];
-					pu8DstY -= s32SrcHeight;
-				}
-
-				pu8SrcY += s32SrcWidth;
-			}
-
-			break;
-		default:
-			break;
-		}
-	}
-
-	pOrigYUV1[0] = pRotaYUV1[0];
-	pOrigYUV1[1] = pRotaYUV1[1];
-	pOrigYUV1[2] = pRotaYUV1[2];
-}
-
-void CImageDlg::mirror_image(LPBYTE pSrcY, LPBYTE pSrcU, LPBYTE pSrcV)
-{
-	int32	i, j;
-	uint8*	pu8SrcY;
-	uint8*	pu8SrcU;
-	uint8*	pu8SrcV;
-	uint8*	pu8DstY;
-	uint8*	pu8DstU;
-	uint8*	pu8DstV;
-
-
-	if (u8MirrorMode == MIRROR_NONE)
-	{
-		pOrigYUV1[0] = pSrcY;
-		pOrigYUV1[1] = pSrcU;
-		pOrigYUV1[2] = pSrcV;
-
-		return;
-	}
-
-	if (u8MirrorMode == MIRROR_BOTH)
-	{
-		switch (u8SampleFormat)
-		{
-		case YUV420:
-			for (i = 0; i < u32ChroPicSize; i++)
-			{
-				pMirrYUV1[1][i] = pSrcU[u32ChroPicSize - 1 - i];
-				pMirrYUV1[2][i] = pSrcV[u32ChroPicSize - 1 - i];
-			}
-		case YUV400:
-			for (i = 0; i < u32LumaPicSize; i++)
-			{
-				pMirrYUV1[0][i] = pSrcY[u32LumaPicSize - 1 - i];
-			}
-
-			break;
-		default:
-			break;
-		}
-	}
-	else if (u8MirrorMode == MIRROR_HORI)
-	{
-		switch (u8SampleFormat)
-		{
-		case YUV420:
-			pu8SrcU = pSrcU;
-			pu8SrcV = pSrcV;
-			pu8DstU = pMirrYUV1[1];
-			pu8DstV = pMirrYUV1[2];
-			for (j = 0; j < (s32Height >> 1); j++)
-			{
-				for (i = 0; i < (s32Width >> 1); i++)
-				{
-					pu8DstU[i] = pu8SrcU[(s32Width >> 1) - 1 - i];
-					pu8DstV[i] = pu8SrcV[(s32Width >> 1) - 1 - i];
-				}
-
-				pu8SrcU += (s32Width >> 1);
-				pu8DstU += (s32Width >> 1);
-				pu8SrcV += (s32Width >> 1);
-				pu8DstV += (s32Width >> 1);
-			}
-		case YUV400:
-			pu8SrcY = pSrcY;
-			pu8DstY = pMirrYUV1[0];
-			for (j = 0; j < s32Height; j++)
-			{
-				for (i = 0; i < s32Width; i++)
-				{
-					pu8DstY[i] = pu8SrcY[s32Width - 1 - i];
-				}
-
-				pu8DstY += s32Width;
-				pu8SrcY += s32Width;
-			}
-
-			break;
-		default:
-			break;
-		}
-	}
-	else if (u8MirrorMode == MIRROR_VERT)
-	{
-		switch (u8SampleFormat)
-		{
-		case YUV420:
-			pu8SrcU = pSrcU;
-			pu8SrcV = pSrcV;
-			pu8DstU = pMirrYUV1[1] + u32ChroPicSize;
-			pu8DstV = pMirrYUV1[2] + u32ChroPicSize;
-			for (j = 0; j < (s32Height >> 1); j++)
-			{
-				pu8DstU -= (s32Width >> 1);
-				pu8DstV -= (s32Width >> 1);
-
-				for (i = 0; i < (s32Width >> 1); i++)
-				{
-					memcpy(pu8DstU, pu8SrcU, (s32Width >> 1));
-					memcpy(pu8DstV, pu8SrcV, (s32Width >> 1));
-				}
-
-				pu8SrcU += (s32Width >> 1);
-				pu8SrcV += (s32Width >> 1);
-			}
-		case YUV400:
-			pu8SrcY = pSrcY;
-			pu8DstY = pMirrYUV1[0] + u32LumaPicSize;
-			for (j = 0; j < s32Height; j++)
-			{
-				pu8DstY -= s32Width;
-
-				for (i = 0; i < s32Width; i++)
-				{
-					memcpy(pu8DstY, pu8SrcY, s32Width);
-				}
-
-				pu8SrcY += s32Width;
-			}
-
-			break;
-		default:
-			break;
-		}
-	}
-
-	pOrigYUV1[0] = pMirrYUV1[0];
-	pOrigYUV1[1] = pMirrYUV1[1];
-	pOrigYUV1[2] = pMirrYUV1[2];
-}
-
 int32 CImageDlg::read_one_frame(uint8 u8ImageMode)
 {
+	uint32  u32LumaBuffSize;
+	uint32  u32ChroBuffSize;
+	LPBYTE Temp_Read[3];
+
+	u32LumaBuffSize = ((u32LumaPicSize + 3) >> 2) << 2;
+	u32ChroBuffSize = ((u32ChroPicSize + 3) >> 2) << 2;
+	Temp_Read[0] = (LPBYTE)malloc(u32LumaBuffSize + (u32ChroBuffSize << 1));
+	Temp_Read[1] = Temp_Read[0] + u32LumaBuffSize;
+	Temp_Read[2] = Temp_Read[1] + u32ChroBuffSize;
 	//++ 启用临界区保护
 	CCriticalSection	CriticalSection(pCriticalSection);
 	
@@ -807,38 +532,38 @@ int32 CImageDlg::read_one_frame(uint8 u8ImageMode)
 	     }
 	  else
 	  {
-		  if (u32LumaPicSize != pFile->Read(pReadYUV1[0], u32LumaPicSize))
+		  if (u32LumaPicSize != pFile->Read(Temp_Read[0], u32LumaPicSize))
 		  {
 			  return EOF_YUVPlayer;
 		  }
-		  if (u32ChroPicSize != pFile->Read(pReadYUV1[1], u32ChroPicSize))
+		  if (u32ChroPicSize != pFile->Read(Temp_Read[1], u32ChroPicSize))
 		  {
 			  return EOF_YUVPlayer;
 		  }
-		  if (u32ChroPicSize != pFile->Read(pReadYUV1[2], u32ChroPicSize))
+		  if (u32ChroPicSize != pFile->Read(Temp_Read[2], u32ChroPicSize))
 		  {
 			  return EOF_YUVPlayer;
 		  }
-
+            
+		  /*********************加8位转换为16位***************************/
+		  for (int i = 0; i< u32LumaPicSize; i++)
+			  pReadYUV[0][i] = (WORD)Temp_Read[0][i];
+		  for (int i = 0; i< u32ChroPicSize; i++)
+		  {
+			  pReadYUV[1][i] = (WORD)Temp_Read[1][i];
+			  pReadYUV[2][i] = (WORD)Temp_Read[2][i];
+		  }
 		  break;
 	  }
+	  
 	}	
 	default:
 		
 		break;
 	}
-	if (u8BitFormat == 10)
-	{
 		rotate_image(pReadYUV[0], pReadYUV[1], pReadYUV[2]);
 		mirror_image(pOrigYUV[0], pOrigYUV[1], pOrigYUV[2]);
-	}
-	else
-	{
-		rotate_image(pReadYUV1[0], pReadYUV1[1], pReadYUV1[2]);
-		mirror_image(pOrigYUV1[0], pOrigYUV1[1], pOrigYUV1[2]);
-	}
-
-	color_space_convert(u8ImageMode);
+ 	    color_space_convert(u8ImageMode);
 
 	return SUCCEEDED_YUVPlayer;
 }
@@ -1002,12 +727,12 @@ void CImageDlg::OnMenuitemGosameframe()
     uint32  u32LumaLen;
     uint32  u32ChroLen;
 
-    int32           *p32TwinY	= NULL;
-    int32           *p32CurrY   = NULL;
-    int32           *p32TwinU   = NULL;
-    int32           *p32CurrU   = NULL;
-    int32           *p32TwinV   = NULL;
-    int32           *p32CurrV   = NULL;
+    Pel*    p32TwinY	= NULL;
+    Pel*    p32CurrY   = NULL;
+    Pel*    p32TwinU   = NULL;
+    Pel*    p32CurrU   = NULL;
+    Pel*    p32TwinV   = NULL;
+    Pel*    p32CurrV   = NULL;
 	CYUVPlayerDlg	*pMainDlg	= (CYUVPlayerDlg *)this->pMainDlg;
     CImageDlg	    *pCurrImg	= NULL;
     CImageDlg	    *pTwinImg	= NULL;
@@ -1017,24 +742,13 @@ void CImageDlg::OnMenuitemGosameframe()
     u32ChroLen	= (u32ChroPicSize + 3) >> 2;
     pCurrImg	= pMainDlg->pImage[s8DlgIdx];
     pTwinImg	= pMainDlg->pImage[1 - s8DlgIdx];
-	if (u8BitFormat == 10)
-	{
-		p32TwinY = (int32 *)pTwinImg->pOrigYUV[0];
-		p32CurrY = (int32 *)pCurrImg->pOrigYUV[0];
-		p32TwinU = (int32 *)pTwinImg->pOrigYUV[1];
-		p32CurrU = (int32 *)pCurrImg->pOrigYUV[1];
-		p32TwinV = (int32 *)pTwinImg->pOrigYUV[2];
-		p32CurrV = (int32 *)pCurrImg->pOrigYUV[2];
-	}
-	else
-	{
-		p32TwinY = (int32 *)pTwinImg->pOrigYUV1[0];
-		p32CurrY = (int32 *)pCurrImg->pOrigYUV1[0];
-		p32TwinU = (int32 *)pTwinImg->pOrigYUV1[1];
-		p32CurrU = (int32 *)pCurrImg->pOrigYUV1[1];
-		p32TwinV = (int32 *)pTwinImg->pOrigYUV1[2];
-		p32CurrV = (int32 *)pCurrImg->pOrigYUV1[2];
-	}
+	
+		p32TwinY = (Pel *)pTwinImg->pOrigYUV[0];
+		p32CurrY = (Pel *)pCurrImg->pOrigYUV[0];
+		p32TwinU = (Pel *)pTwinImg->pOrigYUV[1];
+		p32CurrU = (Pel *)pCurrImg->pOrigYUV[1];
+		p32TwinV = (Pel *)pTwinImg->pOrigYUV[2];
+		p32CurrV = (Pel *)pCurrImg->pOrigYUV[2];
 
 	for (s32FrameNr = pCurrImg->s32CurrFrameNr; s32FrameNr < pCurrImg->s32FrameNum; s32FrameNr ++)
 	{
@@ -1417,10 +1131,7 @@ void CImageDlg::free_resource()
 		pFile->Close();
 		delete(pFile);
 	}
-	if (u8BitFormat==10)
 	    free(pYUVBuff);
-	else
-		free(pYUVBuff1);
 	GlobalFree(hloc);
 
 	MBInfoDlg.talbeFont.DeleteObject();
